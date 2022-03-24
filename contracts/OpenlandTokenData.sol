@@ -18,6 +18,9 @@ contract OpenlandTokenData is NFTDataStorage {
 		_;
 	}
 
+	event NewCollection(address indexed collection, address indexed creator);
+	event NewToken(address indexed collection, uint256 indexed tokenId, address indexed owner);
+
 
 	/**
 		@dev Save nft data to storage
@@ -32,7 +35,8 @@ contract OpenlandTokenData is NFTDataStorage {
 		
 		OpenlandCollectible collection = OpenlandCollectible(_collection);
 		address ownerOf = collection.ownerOf(_tokenId);
-		require(ownerOf == msg.sender, "OpenlandNFTData#saveDataToken: only token owner can save data");
+		require(ownerOf == msg.sender || collection.getApproved(_tokenId) == msg.sender, 
+		"OpenlandNFTData#saveDataToken: caller do not have permission");
 		
 		OpenlandTokenDomain memory token = OpenlandTokenDomain(
 			_collection,
@@ -42,6 +46,7 @@ contract OpenlandTokenData is NFTDataStorage {
 			TokenStatus.closed
 		);
 		openlandTokens.push(token);
+		emit NewToken(_collection, _tokenId, ownerOf);
 	}
 
 	/**
@@ -94,6 +99,8 @@ contract OpenlandTokenData is NFTDataStorage {
 	{
 		collectionToBool[_collection] = true;
 		collections.push(_collection);
+
+		emit NewCollection(_collection, OpenlandCollectible(_collection).owner());
 	}
 
 	function _setTokenOwner(OpenlandTokenDomain storage _token, address payable _newOwner) internal {

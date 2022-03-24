@@ -58,7 +58,7 @@ contract OpenlandTokenData is NFTDataStorage {
 		uint256 _price
 	) public
 	{
-		require(_price > 0);
+		require(_price > 0, 'OpenlandNFTData#setTokenPrice: price must be greater than zero');
 		uint256 tokenIndex = getTokenIndex(_collection, _tokenId);
 		OpenlandTokenDomain storage token = openlandTokens[tokenIndex];
 		require(token.owner == msg.sender, "Only token's owner can call this function");

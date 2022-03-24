@@ -94,4 +94,48 @@ describe("OpenlandCollection", () => {
 		let token1 = await trade.tokenAtIndex(token1Index.toNumber());
 		expect(token1.status).to.equal(0); //closed trade
 	});
+
+	it("Should mint and change token price", async () => {
+		// create collection
+		const collection1 = await (
+			await factory.createCollection("test 1", "t1")
+		).wait();
+		const collection1Address = collection1.events[0].address;
+
+		// attch collection
+		let collectible1 = await ethers.getContractAt(
+			"OpenlandCollectible",
+			collection1Address,
+			signer0
+		);
+		// mint tokenId 1
+		let tx1 = await (await collectible1.mintTo(signer0.address)).wait();
+		// approve tokenId 1
+		let tx2 = await (await collectible1.approve(trade.address, 1)).wait();
+		// save token data
+		let tx3 = await (
+			await trade.saveTokenData(
+				collectible1.address,
+				1,
+				ethers.utils.parseEther("10")
+			)
+		).wait();
+
+		// assert token1 price
+		let token1 = await trade.tokenAtIndex(0);
+		expect(token1.price).to.equal(ethers.utils.parseEther("10"));
+
+		// change token1 price
+		let tx4 = await (
+			await trade.setTokenPrice(
+				collectible1.address,
+				1,
+				ethers.utils.parseEther("50")
+			)
+		).wait();
+
+		// assert token1 price again
+		token1 = await trade.tokenAtIndex(0);
+		expect(token1.price).to.equal(ethers.utils.parseEther("50"));
+	});
 });

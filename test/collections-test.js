@@ -1,6 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+const { TokenStatus } = require("./utils/common");
+
 describe("Default collection of web", () => {
 	let signer0;
 	let signer1;
@@ -78,6 +80,6 @@ describe("Default collection of web", () => {
 		);
 
 		// assert status
-		expect(tokenOfSig1.status).to.equal(0);
+		expect(tokenOfSig1.status).to.equal(TokenStatus.CLOSED);
 	});
 });

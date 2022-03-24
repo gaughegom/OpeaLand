@@ -42,13 +42,6 @@ contract OpenlandTokenData is NFTDataStorage {
 			TokenStatus.closed
 		);
 		openlandTokens.push(token);
-
-		//TODO later add when mint in factory
-		// add collection to collectionToBool
-		if (!collectionToBool[_collection]) {
-			collectionToBool[_collection] = true;
-			collections.push(_collection);
-		}
 	}
 
 	/**
@@ -95,6 +88,12 @@ contract OpenlandTokenData is NFTDataStorage {
 		public view returns(OpenlandTokenDomain memory)
 	{
 		return openlandTokens[_index];
+	}
+
+	function addCollection(address _collection) public
+	{
+		collectionToBool[_collection] = true;
+		collections.push(_collection);
 	}
 
 	function _setTokenOwner(OpenlandTokenDomain storage _token, address payable _newOwner) internal {

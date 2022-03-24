@@ -2,85 +2,96 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("OpenlandCollection", () => {
-	let OpenlandCollectible;
-	let OpenlandExchange;
-	let OpenlandTrade;
-	let collect1;
-	let collect2;
 	let trade;
 	let exchange;
+	let factory;
 	let signer0;
 	let signer1;
 	let accounts;
 
 	beforeEach(async () => {
-		OpenlandCollectible = await ethers.getContractFactory(
-			"OpenlandCollectible"
-		);
-		OpenlandTrade = await ethers.getContractFactory("OpenlandTokenTradable");
-		OpenlandExchange = await ethers.getContractFactory("OpenlandExchange");
-
-		trade = await (await OpenlandTrade.deploy()).deployed();
-		exchange = await (await OpenlandExchange.deploy(trade.address)).deployed();
-		collect1 = await (
-			await OpenlandCollectible.deploy("test 1", "t1", trade.address)
-		).deployed();
-		collect2 = await (
-			await OpenlandCollectible.deploy("test 2", "t2", trade.address)
-		).deployed();
-
 		//user
 		signer0 = await ethers.getSigner(0);
 		signer1 = await ethers.getSigner(1);
-
 		//accounts
 		accounts = await ethers.getSigners();
-	});
 
-	it("Should deploy 2 collections and test tokens minted", async () => {
-		//mint tokens
-		const tx1 = await collect1.mintTo(signer0.address);
-		const tx2 = await collect1.mintTo(signer0.address);
-		await tx1.wait();
-		await tx2.wait();
-
-		const tx3 = await collect2.mintTo(signer0.address);
-		await tx3.wait();
-
-		// check all token count collection 1
-		expect((await collect1.totalSupply()).toNumber()).to.equal(2);
-		expect((await collect1.tokensOfOwner(signer0.address)).length).to.equal(2);
-		expect((await collect2.totalSupply()).toNumber()).to.equal(1);
-	});
-
-	it("Should mint and buy some token", async () => {
-		//mint tokens
-		const tx1 = await collect1.mintTo(signer0.address);
-		const tx2 = await collect1.mintTo(signer0.address);
-		await tx1.wait();
-		await tx2.wait();
-
-		//save token to storage
-		const tx3 = await trade.saveTokenData(
-			collect1.address,
-			1,
-			ethers.utils.parseUnits("10", "ether")
+		const OpenlandTrade = await ethers.getContractFactory(
+			"OpenlandTokenTradable"
 		);
-		await tx3.wait();
+		const OpenlandExchange = await ethers.getContractFactory(
+			"OpenlandExchange"
+		);
+		const OpenlandFactory = await ethers.getContractFactory("OpenlandFactory");
 
-		// open trade token
-		const tx4 = await trade.openTrade(collect1.address, 1);
-		await tx4.wait();
+		// deploy trade
+		trade = await (await OpenlandTrade.deploy()).deployed();
+		// deploy factory
+		factory = await (await OpenlandFactory.deploy(trade.address)).deployed();
+		// deploy exchange
+		exchange = await (await OpenlandExchange.deploy(trade.address)).deployed();
+	});
 
-		let exchangeAsSigner1 = exchange.connect(signer1);
+	it("Should create 1 collections and mint token with signer0", async () => {
+		// create collection
+		const collection1 = await (
+			await factory.createCollection("test 1", "t1")
+		).wait();
+		const collection1Address = collection1.events[0].address;
 
-		// buy token
-		const tx5 = await exchangeAsSigner1.exchange(collect1.address, 1, {
-			value: ethers.utils.parseUnits("610", "ether"),
-		});
-		await tx5.wait();
+		let collectible1 = await ethers.getContractAt(
+			"OpenlandCollectible",
+			collection1Address,
+			signer0
+		);
+		let tx1 = await (await collectible1.mintTo(signer0.address)).wait();
 
-		let ownerOfToken1 = await collect1.ownerOf(1);
+		let ownerOfToken1 = await collectible1.ownerOf(1);
+		expect(ownerOfToken1).to.equal(signer0.address);
+		expect((await collectible1.totalSupply()).toNumber()).to.equal(1);
+	});
+
+	it("Should mint and buy token", async () => {
+		const price = "100";
+
+		// create collection
+		const collection1 = await (
+			await factory.createCollection("test 1", "t1")
+		).wait();
+		const collection1Address = collection1.events[0].address;
+
+		// connect collection just created
+		let collectible1 = await ethers.getContractAt(
+			"OpenlandCollectible",
+			collection1Address,
+			signer0
+		);
+
+		// mint token and openTrade
+		let tx1 = await (await collectible1.mintTo(signer0.address)).wait();
+		let tx2 = await (await collectible1.approve(trade.address, 1)).wait();
+		let tx3 = await (
+			await trade.saveTokenData(
+				collectible1.address,
+				1,
+				ethers.utils.parseEther(price)
+			)
+		).wait();
+		let tx4 = await (await trade.openTrade(collectible1.address, 1)).wait();
+
+		// connect exchange with signer1
+		let exchangeSigner1 = exchange.connect(signer1);
+		let tx5 = await (
+			await exchangeSigner1.exchange(collectible1.address, 1, {
+				value: ethers.utils.parseEther(price),
+			})
+		).wait();
+
+		let ownerOfToken1 = await collectible1.ownerOf(1);
 		expect(ownerOfToken1).to.equal(signer1.address);
+
+		let token1Index = await trade.getTokenIndex(collectible1.address, 1);
+		let token1 = await trade.tokenAtIndex(token1Index.toNumber());
+		expect(token1.status).to.equal(0); //closed trade
 	});
 });

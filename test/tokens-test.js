@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("OpenlandCollection", () => {
+describe("Mint and test token func", () => {
 	let trade;
 	let exchange;
 	let factory;
@@ -52,7 +52,7 @@ describe("OpenlandCollection", () => {
 	});
 
 	it("Should mint and buy token", async () => {
-		const price = "100";
+		const price = "5";
 
 		// create collection
 		const collection1 = await (
@@ -113,29 +113,31 @@ describe("OpenlandCollection", () => {
 		// approve tokenId 1
 		let tx2 = await (await collectible1.approve(trade.address, 1)).wait();
 		// save token data
+		let price = "10";
 		let tx3 = await (
 			await trade.saveTokenData(
 				collectible1.address,
 				1,
-				ethers.utils.parseEther("10")
+				ethers.utils.parseEther(price)
 			)
 		).wait();
 
 		// assert token1 price
 		let token1 = await trade.tokenAtIndex(0);
-		expect(token1.price).to.equal(ethers.utils.parseEther("10"));
+		expect(token1.price).to.equal(ethers.utils.parseEther(price));
 
 		// change token1 price
+		let newPrice = "50";
 		let tx4 = await (
 			await trade.setTokenPrice(
 				collectible1.address,
 				1,
-				ethers.utils.parseEther("50")
+				ethers.utils.parseEther(newPrice)
 			)
 		).wait();
 
 		// assert token1 price again
 		token1 = await trade.tokenAtIndex(0);
-		expect(token1.price).to.equal(ethers.utils.parseEther("50"));
+		expect(token1.price).to.equal(ethers.utils.parseEther(newPrice));
 	});
 });

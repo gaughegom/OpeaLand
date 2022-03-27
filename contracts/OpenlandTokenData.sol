@@ -18,8 +18,7 @@ contract OpenlandTokenData is NFTDataStorage {
 		_;
 	}
 
-	event NewCollection(address indexed collection, address indexed creator);
-	event NewToken(address indexed collection, uint256 indexed tokenId, address indexed owner);
+	event SaveTokenData(address indexed collection, uint256 indexed tokenId, address indexed owner);
 
 
 	/**
@@ -46,7 +45,7 @@ contract OpenlandTokenData is NFTDataStorage {
 			TokenStatus.closed
 		);
 		openlandTokens.push(token);
-		emit NewToken(_collection, _tokenId, ownerOf);
+		emit SaveTokenData(_collection, _tokenId, ownerOf);
 	}
 
 	/**
@@ -99,8 +98,6 @@ contract OpenlandTokenData is NFTDataStorage {
 	{
 		collectionToBool[_collection] = true;
 		collections.push(_collection);
-
-		emit NewCollection(_collection, OpenlandCollectible(_collection).owner());
 	}
 
 	function _setTokenOwner(OpenlandTokenDomain storage _token, address payable _newOwner) internal {

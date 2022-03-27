@@ -10,6 +10,8 @@ contract OpenlandFactory is NFTDataStorage, Ownable {
 	OpenlandTokenTradable public tradable;
 	OpenlandCollectible public defaultCollect;
 
+	event CreateCollection(address indexed collection, address indexed creator);
+
 	constructor(address _tradable)
 	{
 		tradable = OpenlandTokenTradable(_tradable);
@@ -25,6 +27,8 @@ contract OpenlandFactory is NFTDataStorage, Ownable {
 	{
 		OpenlandCollectible collection = new OpenlandCollectible(_name, _symbol, msg.sender);
 		tradable.addCollection(address(collection));
+
+		emit CreateCollection(address(collection), msg.sender);
 	}
 
 	/**

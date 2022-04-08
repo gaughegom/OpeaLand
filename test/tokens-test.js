@@ -30,6 +30,9 @@ describe("Mint and test token func", () => {
 		factory = await (await OpenlandFactory.deploy(trade.address)).deployed();
 		// deploy exchange
 		exchange = await (await OpenlandExchange.deploy(trade.address)).deployed();
+
+		// add trade operator
+		await (await trade.addOperator(exchange.address)).wait();
 	});
 
 	it("Should create 1 collections and mint token with signer0", async () => {
@@ -83,7 +86,7 @@ describe("Mint and test token func", () => {
 		let exchangeSigner1 = exchange.connect(signer1);
 		let tx5 = await (
 			await exchangeSigner1.exchange(collectible1.address, 1, {
-				value: ethers.utils.parseEther(price),
+				value: ethers.utils.parseEther(price)
 			})
 		).wait();
 

@@ -8,6 +8,15 @@ import "./OpenlandCollectible.sol";
 import "hardhat/console.sol";
 
 contract OpenlandTokenData is NFTDataStorage {
+	// store all nfts
+	OpenlandTokenDomain[] public openlandTokens;
+
+	// store all collection address
+	address[] public collections;
+	
+	// check collection is existed
+	mapping(address => bool) public collectionToBool;
+
 	modifier onlyTokenOwner(address tokenOwner) {
 		require(tokenOwner == msg.sender, "Only token's owner can call this function");
 		_;

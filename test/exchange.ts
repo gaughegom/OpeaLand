@@ -1,0 +1,258 @@
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-waffle";
+import { ethers } from "hardhat";
+import { expect } from "chai";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber, Contract, ContractFactory } from "ethers";
+import { contractFactory } from "../utils";
+import { mintERC721Token } from "./utils/mintToken";
+import { addOwnableOperatorRole } from "./utils/operatorRole";
+import { AssetSell, AssetType } from "../model/Asset.model";
+
+// signers
+let signers: SignerWithAddress[];
+let owner: SignerWithAddress;
+let stranger: SignerWithAddress;
+let minter: SignerWithAddress;
+
+// contracts
+let MockExchange: ContractFactory;
+let Holder: ContractFactory;
+let TransferProxy: ContractFactory;
+let ExchangeSell: ContractFactory;
+let ERC721Land: ContractFactory;
+let mockExchangeIns: Contract;
+let holderIns: Contract;
+let transferProxyIns: Contract;
+let exchangeSellIns: Contract;
+let erc721LandIns: Contract;
+
+before(async () => {
+	signers = await ethers.getSigners();
+	owner = signers[0];
+	stranger = signers[6];
+	MockExchange = await ethers.getContractFactory(
+		contractFactory.MockExchangeCore
+	);
+});
+
+describe("# ExchangeCore", () => {
+	let tx: any;
+	beforeEach(async () => {
+		// deployed
+		mockExchangeIns = await MockExchange.connect(owner).deploy();
+		await mockExchangeIns.deployed();
+		// send eth
+		tx = await owner.sendTransaction({
+			to: mockExchangeIns.address,
+			value: ethers.utils.parseEther("11")
+		});
+	});
+
+	it("should allow contract receive eth", async () => {
+		const contractBalance = await mockExchangeIns.balance();
+		expect(contractBalance).to.be.equal(
+			BigNumber.from(ethers.utils.parseEther("11"))
+		);
+		expect(tx)
+			.to.be.emit(mockExchangeIns, "Receive")
+			.withArgs(contractBalance, owner.address);
+	});
+
+	it("should allow owner to withdraw", async () => {
+		tx = await mockExchangeIns
+			.connect(owner)
+			.withdraw(ethers.utils.parseEther("5"));
+		await tx.wait();
+
+		expect(await mockExchangeIns.balance()).to.be.equal(
+			BigNumber.from(ethers.utils.parseEther("6"))
+		);
+		expect(tx)
+			.to.be.emit(mockExchangeIns, "Withdraw")
+			.withArgs(ethers.utils.parseEther("5"), owner.address);
+	});
+
+	it("should NOT allow non-owner to withdraw", async () => {
+		tx = mockExchangeIns
+			.connect(stranger)
+			.withdraw(ethers.utils.parseEther("5"));
+
+		await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+	});
+
+	it("should NOT allow to withdraw amount > balance", async () => {
+		tx = mockExchangeIns.connect(owner).withdraw(ethers.utils.parseEther("20"));
+
+		await expect(tx).to.be.revertedWith(
+			"ExchangeCore#withdraw: amount must be lesser than balance"
+		);
+	});
+});
+
+describe("# ExchangeSell", () => {
+	const exchangeRole = ethers.utils.keccak256(
+		ethers.utils.toUtf8Bytes("EXCHANGE_ROLE")
+	);
+	let asset: AssetSell;
+
+	before(async () => {
+		minter = signers[4];
+		Holder = await ethers.getContractFactory(contractFactory.Holder);
+		TransferProxy = await ethers.getContractFactory(
+			contractFactory.TransferProxy
+		);
+		ExchangeSell = await ethers.getContractFactory(
+			contractFactory.ExchangeSell
+		);
+		ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
+	});
+
+	beforeEach(async () => {
+		// deployed
+		transferProxyIns = await TransferProxy.connect(owner).deploy();
+		holderIns = await Holder.connect(owner).deploy();
+		await transferProxyIns.deployed();
+		await holderIns.deployed();
+		erc721LandIns = await ERC721Land.connect(minter).deploy(
+			"Test Exchange Token",
+			"TET",
+			transferProxyIns.address
+		);
+		exchangeSellIns = await ExchangeSell.connect(owner).deploy(
+			transferProxyIns.address,
+			holderIns.address
+		);
+		// mint token
+		await mintERC721Token(
+			erc721LandIns.connect(minter),
+			minter.address,
+			"ipfs://test.com"
+		);
+		// add operator
+		await addOwnableOperatorRole([transferProxyIns], exchangeSellIns, owner);
+		// grant access  holder
+		await (
+			await holderIns
+				.connect(owner)
+				.grantAccess(exchangeRole, exchangeSellIns.address)
+		).wait();
+		// init asset obj
+		asset = new AssetSell(
+			erc721LandIns,
+			minter.address,
+			BigNumber.from(1),
+			BigNumber.from(ethers.utils.parseEther("2"))
+		);
+	});
+
+	describe("list & delist asset token", () => {
+		it("should allow owner of token list asset", async () => {
+			const tx = await exchangeSellIns
+				.connect(minter)
+				.list(asset.domain.token, asset.domain.tokenId, asset.price);
+			await tx.wait();
+
+			expect(await erc721LandIns.ownerOf(1)).to.be.equal(holderIns.address);
+			expect(tx)
+				.to.be.emit(exchangeSellIns, "ListAsset")
+				.withArgs(asset.domain.token, asset.domain.tokenId);
+			expect(
+				(await exchangeSellIns.assetsSell(asset.bytes32HashKey)).price
+			).to.be.equal(asset.price);
+		});
+
+		it("should NOT allow non-owner of token list asset", async () => {
+			const tx = exchangeSellIns
+				.connect(stranger)
+				.list(asset.domain.token, asset.domain.tokenId, asset.price);
+
+			await expect(tx).to.be.revertedWith(
+				"ExchangeSell#_validateOwnerOfToken: caller must be owner of token"
+			);
+		});
+
+		it("should NOT allow to list asset with too low price", async () => {
+			asset.price = BigNumber.from(ethers.utils.parseEther("0.00000001"));
+			const tx = exchangeSellIns
+				.connect(minter)
+				.list(asset.domain.token, asset.domain.tokenId, asset.price);
+
+			await expect(tx).to.be.revertedWith(
+				"ExchangeSell#list: asset price is too low"
+			);
+		});
+	});
+
+	describe("allow to purchase", () => {
+		let buyer: SignerWithAddress;
+		let tx: any;
+		beforeEach(async () => {
+			// list asset
+			await (
+				await exchangeSellIns
+					.connect(minter)
+					.list(asset.domain.token, asset.domain.tokenId, asset.price)
+			).wait();
+			buyer = signers[7];
+			tx = await exchangeSellIns
+				.connect(buyer)
+				.purchase(asset.bytes32HashKey, { value: asset.price });
+			await tx.wait();
+		});
+
+		it("should asset token belongs to buyer", async () => {
+			expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
+				buyer.address
+			);
+		});
+
+		it("should exchange contract receive eth", async () => {
+			expect(await exchangeSellIns.balance()).to.be.equal(
+				ethers.utils.parseEther("0.0005")
+			);
+		});
+
+		it("should emit event Purchase", async () => {
+			expect(tx)
+				.to.be.emit(exchangeSellIns, "Purchase")
+				.withArgs(asset.bytes32HashKey, buyer.address, asset.price);
+		});
+
+		it("should asset in NUll state after purchasing", async () => {
+			expect(await holderIns.get(asset.bytes32HashKey)).to.be.equal(
+				AssetType.NULL
+			);
+		});
+	});
+
+	it("should NOT allow to purchase with insufficient bid value", async () => {
+		const buyer = signers[7];
+		const amount = asset.price.toBigInt() - BigNumber.from("10000").toBigInt();
+		// list asset
+		await (
+			await exchangeSellIns
+				.connect(minter)
+				.list(asset.domain.token, asset.domain.tokenId, asset.price)
+		).wait();
+		// execute tx
+		const tx = exchangeSellIns
+			.connect(buyer)
+			.purchase(asset.bytes32HashKey, { value: amount });
+
+		await expect(tx).to.be.revertedWith(
+			"ExchangeSell#purchase: insufficient value"
+		);
+	});
+
+	it("should NOT allow to purchase an unlisted asset token", async () => {
+		const buyer = signers[7];
+		const tx = exchangeSellIns
+			.connect(buyer)
+			.purchase(asset.bytes32HashKey, { value: asset.price });
+
+		await expect(tx).to.be.revertedWith(
+			"ExchangeSell#delist: asset is not listed"
+		);
+	});
+});

@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./OpenlandCollectible.sol";
 import "./OpenlandTokenData.sol";
+import "./roles/OperatorRoles.sol";
 
-contract OpenlandTokenTradable is OpenlandTokenData {
+contract OpenlandTokenTradable is OpenlandTokenData, OperatorRoles {
 	event TokenStatusChange(
 		address indexed collection, 
 		uint256 indexed tokenId, 
@@ -57,30 +58,16 @@ contract OpenlandTokenTradable is OpenlandTokenData {
 		@dev Transfer token to another address
 		Call when token is buyed
 	 */
-	function exchangeToken(
-		address _collection,
-		address _to,
-		uint256 _tokenId,
-		uint256 _bidValue
-	)
-		public returns (address payable, uint256 _value)
-	{
-		uint256 tokenIndex = getTokenIndex(_collection, _tokenId);
-		OpenlandTokenDomain storage token = openlandTokens[tokenIndex];
+	function transferToken(uint256 _tokenIndex, address _to) public onlyOperator {
+		OpenlandTokenDomain storage token = openlandTokens[_tokenIndex];
+		OpenlandCollectible collect = OpenlandCollectible(token.collection);
 
-		require(token.status == TokenStatus.opened, "OpenlandNFTData#exchangeToken: token is not opened");
-		require(_bidValue >= token.price, "OpenlandNFTData#exchangeToken: bid value is less than token price");
-
-		OpenlandCollectible collection = OpenlandCollectible(token.collection);
-		collection.safeTransferFrom(token.owner, _to, token.tokenId);
-		
-		address payable beneficiary = token.owner;
+		collect.safeTransferFrom(token.owner, _to, token.tokenId);
+		address payable oldOwner = token.owner;
 
 		_setTokenOwner(token, payable(_to));
 		_setTokenStatus(token, TokenStatus.closed);
 
-		emit ExchangeToken(_collection, beneficiary, _to, _tokenId);
-
-		return (beneficiary, token.price);
+		emit ExchangeToken(token.collection, oldOwner, _to, token.tokenId);
 	}
 }

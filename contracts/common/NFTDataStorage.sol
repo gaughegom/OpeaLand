@@ -18,14 +18,4 @@ contract NFTDataStorage {
 		closed,
 		opened
 	}
-
-		
-	// store all nfts
-	OpenlandTokenDomain[] public openlandTokens;
-
-	// store all collection address
-	address[] public collections;
-	
-	// check collection is existed
-	mapping(address => bool) public collectionToBool;
 }

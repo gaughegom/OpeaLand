@@ -7,7 +7,7 @@ import { BigNumber, Contract, ContractFactory } from "ethers";
 import { contractFactory } from "../utils";
 import { mintERC721Token } from "./utils/mintToken";
 import { addOwnableOperatorRole } from "./utils/operatorRole";
-import { AssetSell, AssetType } from "../model/Asset.model";
+import { AssetAuction, AssetSell, AssetType } from "../model/Asset.model";
 
 // signers
 let signers: SignerWithAddress[];
@@ -20,11 +20,13 @@ let MockExchange: ContractFactory;
 let Holder: ContractFactory;
 let TransferProxy: ContractFactory;
 let ExchangeSell: ContractFactory;
+let ExchangeAuction: ContractFactory;
 let ERC721Land: ContractFactory;
 let mockExchangeIns: Contract;
 let holderIns: Contract;
 let transferProxyIns: Contract;
 let exchangeSellIns: Contract;
+let exchangeAuctionIns: Contract;
 let erc721LandIns: Contract;
 
 before(async () => {
@@ -254,5 +256,100 @@ describe("# ExchangeSell", () => {
 		await expect(tx).to.be.revertedWith(
 			"ExchangeSell#delist: asset is not listed"
 		);
+	});
+});
+
+describe("# ExchangeAuction", () => {
+	const exchangeRole = ethers.utils.keccak256(
+		ethers.utils.toUtf8Bytes("EXCHANGE_ROLE")
+	);
+	let asset: AssetAuction;
+
+	before(async () => {
+		Holder = await ethers.getContractFactory(contractFactory.Holder);
+		TransferProxy = await ethers.getContractFactory(
+			contractFactory.TransferProxy
+		);
+		ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
+		ExchangeAuction = await ethers.getContractFactory(
+			contractFactory.ExchangeAuction
+		);
+	});
+
+	beforeEach(async () => {
+		minter = signers[4];
+		// deployed
+		transferProxyIns = await TransferProxy.connect(owner).deploy();
+		holderIns = await Holder.connect(owner).deploy();
+		await transferProxyIns.deployed();
+		await holderIns.deployed();
+		erc721LandIns = await (
+			await ERC721Land.connect(minter).deploy(
+				"Test Exchange Token",
+				"TET",
+				transferProxyIns.address
+			)
+		).deployed();
+		exchangeAuctionIns = await (
+			await ExchangeAuction.connect(owner).deploy(
+				transferProxyIns.address,
+				holderIns.address
+			)
+		).deployed();
+		// mint token
+		await mintERC721Token(
+			erc721LandIns.connect(minter),
+			minter.address,
+			"ipfs://test.com"
+		);
+		// add operator
+		await addOwnableOperatorRole([transferProxyIns], exchangeAuctionIns, owner);
+		// grant access  holder
+		await (
+			await holderIns
+				.connect(owner)
+				.grantAccess(exchangeRole, exchangeAuctionIns.address)
+		).wait();
+		// init asset obj
+		asset = new AssetAuction(
+			erc721LandIns,
+			minter.address,
+			BigNumber.from(1),
+			BigNumber.from(ethers.utils.parseEther("0.01")),
+			BigNumber.from(0)
+		);
+	});
+
+	describe("start auction", () => {
+		let tx: any;
+		beforeEach(async () => {
+			asset.endTime = BigNumber.from(
+				Math.round((Date.now() + new Date().getTimezoneOffset()) / 1000) + 240
+			);
+			tx = await exchangeAuctionIns
+				.connect(minter)
+				.start(
+					asset.domain.token,
+					asset.domain.tokenId,
+					asset.startPrice,
+					asset.endTime
+				);
+			await tx.wait();
+		});
+
+		it("should asset in auctions", async () => {
+			const auction = await exchangeAuctionIns.assetsAuction(
+				asset.bytes32HashKey
+			);
+			expect(auction.domain.token).to.be.equal(asset.domain.token);
+			expect(auction.domain.seller).to.be.equal(minter.address);
+			expect(auction.startPrice).to.be.equal(asset.startPrice);
+		});
+
+		it("should emit StartAuction event", async () => {
+			await expect(tx)
+				.to.be.emit(exchangeAuctionIns, "StartAuction")
+				.withArgs(asset.bytes32HashKey);
+		});
 	});
 });

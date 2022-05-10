@@ -16,6 +16,12 @@ export interface IAssetSell {
 	price: BigNumber;
 }
 
+export interface IAssetAuction {
+	domain: IAssetDomain;
+	startPrice: BigNumber;
+	endTime: BigNumber;
+}
+
 export enum AssetType {
 	NULL,
 	Sell,
@@ -43,4 +49,26 @@ export class AssetSell implements IAssetSell, IAssetLibs {
 	}
 }
 
-export class AssetAuction {}
+export class AssetAuction implements IAssetAuction, IAssetLibs {
+	domain: IAssetDomain;
+	startPrice: BigNumber;
+	endTime: BigNumber;
+	bytes32HashKey: string;
+
+	constructor(
+		token: Contract,
+		seller: string,
+		tokenId: BigNumber,
+		startPrice: BigNumber,
+		endTime: BigNumber
+	) {
+		this.domain = {
+			token: token.address,
+			seller: seller,
+			tokenId: tokenId
+		};
+		this.startPrice = startPrice;
+		this.endTime = endTime;
+		this.bytes32HashKey = hashBytes32Key(this.domain);
+	}
+}

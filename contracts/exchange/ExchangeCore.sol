@@ -34,5 +34,5 @@ abstract contract ExchangeCore is Ownable {
 		emit Withdraw(amount, _msgSender());
 	}
 
-	function _validateAvailable(bytes32 assetKey) virtual internal {}
+	function _requireAvailable(bytes32 assetKey) virtual internal {}
 }

@@ -67,7 +67,7 @@ contract ExchangeSell is ExchangeCore {
 	function delist(address token, uint256 tokenId) external 
 	{
 		bytes32 assetKey = HashAsset.hashKey(token, tokenId);
-		_validateAvailable(assetKey);
+		_requireAvailable(assetKey);
 
 		// redeem from holder
 		transferProxy.erc721SafeTransfer(
@@ -88,7 +88,7 @@ contract ExchangeSell is ExchangeCore {
 	 */
 	function purchase(bytes32 assetKey) external payable
 	{
-		_validateAvailable(assetKey);
+		_requireAvailable(assetKey);
 		ExchangeDomain.AssetSell memory asset = assetsSell[assetKey];
 		require(msg.value >= asset.price, "ExchangeSell#purchase: insufficient value");
 
@@ -127,7 +127,7 @@ contract ExchangeSell is ExchangeCore {
 		return asset;
 	}
 
-	function _validateAvailable(bytes32 assetKey) override internal view {
+	function _requireAvailable(bytes32 assetKey) override internal view {
 		require(holder.get(assetKey) == ExchangeState.AssetType.Sell,
 				"ExchangeSell#delist: asset is not listed");
 	}

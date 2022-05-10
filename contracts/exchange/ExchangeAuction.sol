@@ -9,6 +9,8 @@ import "./Holder.sol";
 import "../libs/HashAsset.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "hardhat/console.sol";
+
 contract ExchangeAuction is ExchangeCore {
 	using SafeMath for uint256;
 
@@ -83,6 +85,7 @@ contract ExchangeAuction is ExchangeCore {
 	function end(address token, uint256 tokenId) external
 	{
 		bytes32 assetKey = HashAsset.hashKey(token, tokenId);
+		_requireAvailable(assetKey);
 		ExchangeDomain.AssetAuction memory asset = assetsAuction[assetKey];
 		_requireEndTime(asset.endTime);
 
@@ -118,6 +121,7 @@ contract ExchangeAuction is ExchangeCore {
 	 */
 	function bid(bytes32 assetKey) external payable
 	{
+		_requireAvailable(assetKey);
 		_requireEndTime(assetsAuction[assetKey].endTime);
 		ExchangeDomain.AuctionParam storage auctionParam = auctionsParam[assetKey];
 		if (auctionParam.highestBid == 0) {
@@ -166,7 +170,14 @@ contract ExchangeAuction is ExchangeCore {
 		auctionParam.highestBidder = _msgSender();
 	}
 	
-	function _requireEndTime(uint256 endTime) internal view {
+	function _requireAvailable(bytes32 assetKey) override internal view
+	{
+		require(holder.get(assetKey) == ExchangeState.AssetType.Auction,
+				"ExchangeAuction: asset is not in auction");
+	}
+	
+	function _requireEndTime(uint256 endTime) internal view
+	{
 		require(block.timestamp >= endTime, "ExchangeAuction: aution time is not end");
 	}
 }

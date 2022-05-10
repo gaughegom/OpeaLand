@@ -4,9 +4,9 @@ import Header from "./components/Header";
 
 function App() {
 	return (
-		<React.Fragment>
+		<>
 			<Header></Header>
-		</React.Fragment>
+		</>
 	);
 }
 

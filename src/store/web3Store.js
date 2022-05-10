@@ -1,20 +1,25 @@
+import { ethers } from "ethers";
 import create from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, subscribeWithSelector } from "zustand/middleware";
+
+const initProvider = new ethers.providers.Web3Provider(window.ethereum, "any");
+
+const handleSetProvider = async (set, get, provider) => {
+	set({ provider: provider });
+	const accounts = await provider.send("eth_requestAccounts", []);
+	set({ address: accounts[0] });
+};
 
 const useWeb3Store = create(
-	devtools((set, get) => ({
-		injectedProvider: undefined,
-		signer: undefined,
-		address: undefined,
-		setInjectedProvider: function (injected) {
-			set({ injectedProvider: injected });
-		},
-		setSigner: async function (signer) {
-			set({ signer: signer });
-			const address = await get().signer.getAddress();
-			set({ address: address });
-		}
-	}))
+	subscribeWithSelector(
+		devtools((set, get) => ({
+			provider: initProvider,
+			address: null,
+			setProvider: (provider) => {
+				handleSetProvider(set, get, provider);
+			}
+		}))
+	)
 );
 
 export default useWeb3Store;

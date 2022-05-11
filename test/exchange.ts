@@ -8,6 +8,7 @@ import { contractFactory } from "../utils";
 import { mintERC721Token } from "./utils/mintToken";
 import { addOwnableOperatorRole } from "./utils/operatorRole";
 import { AssetAuction, AssetSell, AssetType } from "../model/Asset.model";
+import delay from "delay";
 
 // signers
 let signers: SignerWithAddress[];
@@ -324,7 +325,7 @@ describe("# ExchangeAuction", () => {
 		let tx: any;
 		beforeEach(async () => {
 			asset.endTime = BigNumber.from(
-				Math.round((Date.now() + new Date().getTimezoneOffset()) / 1000) + 240
+				Math.round((Date.now() + new Date().getTimezoneOffset()) / 1000) + 150
 			);
 			tx = await exchangeAuctionIns
 				.connect(minter)
@@ -374,6 +375,58 @@ describe("# ExchangeAuction", () => {
 			);
 			expect(auctionParam.highestBid).to.be.equal(bidAmount);
 			expect(auctionParam.highestBidder).to.be.equal(bidder.address);
+		});
+
+		it("should NOT allow to bid with value is lower than start price", async () => {
+			const bidder = signers[8];
+			const amount =
+				asset.startPrice.toBigInt() -
+				ethers.utils.parseEther("0.01").toBigInt();
+			const tx = exchangeAuctionIns
+				.connect(bidder)
+				.bid(asset.bytes32HashKey, { value: amount });
+
+			await expect(tx).to.be.revertedWith(
+				"ExchangeAuction: bid value is lower than start price"
+			);
+		});
+
+		it("should NOT allow to bid with value is lower than highest bid", async () => {
+			const bidder1 = signers[7];
+			const bidder2 = signers[8];
+			const amount1 =
+				asset.startPrice.toBigInt() +
+				ethers.utils.parseEther("0.01").toBigInt();
+			const amount2 =
+				asset.startPrice.toBigInt() +
+				ethers.utils.parseEther("0.0001").toBigInt();
+
+			await (
+				await exchangeAuctionIns
+					.connect(bidder1)
+					.bid(asset.bytes32HashKey, { value: amount1 })
+			).wait();
+			const tx = exchangeAuctionIns
+				.connect(bidder2)
+				.bid(asset.bytes32HashKey, { value: amount2 });
+
+			await expect(tx).to.be.revertedWith(
+				"ExchangeAuction: bid value is lower than the highest price"
+			);
+		});
+
+		it("should NOT allow to bid when auction time is ended", async () => {
+			const bidder = signers[8];
+			const amount =
+				asset.startPrice.toBigInt() +
+				ethers.utils.parseEther("0.0001").toBigInt();
+
+			await delay(30000);
+
+			const tx = exchangeAuctionIns
+				.connect(bidder)
+				.bid(asset.bytes32HashKey, { value: amount });
+			await expect(tx).to.be.revertedWith("ExchangeAuction: auction is ended");
 		});
 	});
 });

@@ -356,5 +356,24 @@ describe("# ExchangeAuction", () => {
 			const assetType = await holderIns.get(asset.bytes32HashKey);
 			expect(assetType).to.be.equal(AssetType.Auction);
 		});
+
+		it("should allow to bid asset auction", async () => {
+			const bidder = signers[8];
+			const bidAmount =
+				asset.startPrice.toBigInt() + ethers.utils.parseEther("0.5").toBigInt();
+			const tx = await exchangeAuctionIns
+				.connect(bidder)
+				.bid(asset.bytes32HashKey, {
+					value: bidAmount
+				});
+
+			await tx.wait();
+
+			const auctionParam = await exchangeAuctionIns.auctionsParam(
+				asset.bytes32HashKey
+			);
+			expect(auctionParam.highestBid).to.be.equal(bidAmount);
+			expect(auctionParam.highestBidder).to.be.equal(bidder.address);
+		});
 	});
 });

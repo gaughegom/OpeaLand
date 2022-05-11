@@ -71,6 +71,7 @@ contract ExchangeAuction is ExchangeCore {
 			address(holder),
 			tokenId
 		);
+		holder.set(assetKey, ExchangeState.AssetType.Auction);
 
 		emit StartAuction(assetKey);
 	}
@@ -105,6 +106,7 @@ contract ExchangeAuction is ExchangeCore {
 		
 		// transfer token
 		transferProxy.erc721SafeTransfer(IERC721(token), address(holder), auctionParam.highestBidder, tokenId);
+		holder.set(assetKey, ExchangeState.AssetType.NULL);
 
 		// refund all
 		for (uint i = auctionParam.bidders.length - 1; i >= 0; i++) {

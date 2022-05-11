@@ -351,5 +351,10 @@ describe("# ExchangeAuction", () => {
 				.to.be.emit(exchangeAuctionIns, "StartAuction")
 				.withArgs(asset.bytes32HashKey);
 		});
+
+		it("should asset in holder", async () => {
+			const assetType = await holderIns.get(asset.bytes32HashKey);
+			expect(assetType).to.be.equal(AssetType.Auction);
+		});
 	});
 });

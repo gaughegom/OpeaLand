@@ -129,17 +129,17 @@ contract ExchangeAuction is ExchangeCore {
 		if (auctionParam.highestBid == 0) {
 			require(msg.value >= assetsAuction[assetKey].startPrice, "ExchangeAuction: bid value is lower than start price");
 			_setHighestBid(auctionParam, msg.value);
-			auctionParam.bidders.push(_msgSender());
+			_newBidder(auctionParam, msg.value);
 			return;
 		}
 
 		uint bidValue = msg.value;
 		uint biddedValue = auctionParam.pendingReturns[_msgSender()];
 		if (biddedValue != 0) {
-			auctionParam.pendingReturns[_msgSender()] += bidValue;
 			bidValue += biddedValue;
+			auctionParam.pendingReturns[_msgSender()] = bidValue;
 		} else {
-			auctionParam.bidders.push(_msgSender());
+			_newBidder(auctionParam, bidValue);
 		}
 		require(bidValue >= auctionParam.highestBid, "ExchangeAuction: bid value is lower than the highest price");
 
@@ -180,5 +180,10 @@ contract ExchangeAuction is ExchangeCore {
 
 	function _isAuctionEnd(uint256 time) internal view returns(bool) {
 		return block.timestamp >= time;
+	}
+
+	function _newBidder(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal {
+		auctionParam.bidders.push(_msgSender());
+		auctionParam.pendingReturns[_msgSender()] = value;
 	}
 }

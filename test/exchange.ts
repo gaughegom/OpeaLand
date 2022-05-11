@@ -377,6 +377,30 @@ describe("# ExchangeAuction", () => {
 			expect(auctionParam.highestBidder).to.be.equal(bidder.address);
 		});
 
+		it("should calc old bid value", async () => {
+			const bidder = signers[7];
+			const preAmount = asset.startPrice.toBigInt();
+			const addAmount = ethers.utils.parseEther("0.001");
+
+			await (
+				await exchangeAuctionIns
+					.connect(bidder)
+					.bid(asset.bytes32HashKey, { value: preAmount })
+			).wait();
+
+			const tx = await exchangeAuctionIns
+				.connect(bidder)
+				.bid(asset.bytes32HashKey, { value: addAmount });
+			await tx.wait();
+
+			const auctionParam = await exchangeAuctionIns.auctionsParam(
+				asset.bytes32HashKey
+			);
+			expect(auctionParam.highestBid).to.be.equal(
+				preAmount + addAmount.toBigInt()
+			);
+		});
+
 		it("should NOT allow to bid with value is lower than start price", async () => {
 			const bidder = signers[8];
 			const amount =

@@ -88,7 +88,7 @@ contract ExchangeAuction is ExchangeCore {
 		bytes32 assetKey = HashAsset.hashKey(token, tokenId);
 		_requireAvailable(assetKey);
 		ExchangeDomain.AssetAuction memory asset = assetsAuction[assetKey];
-		_requireEndTime(asset.endTime);
+		require(_isAuctionEnd(asset.endTime), "ExchangeAuction: auction is not end");
 
 		ExchangeDomain.AuctionParam storage auctionParam = auctionsParam[assetKey];
 
@@ -124,7 +124,7 @@ contract ExchangeAuction is ExchangeCore {
 	function bid(bytes32 assetKey) external payable
 	{
 		_requireAvailable(assetKey);
-		_requireEndTime(assetsAuction[assetKey].endTime);
+		require(!_isAuctionEnd(assetsAuction[assetKey].endTime), "ExchangeAuction: auction is ended");
 		ExchangeDomain.AuctionParam storage auctionParam = auctionsParam[assetKey];
 		if (auctionParam.highestBid == 0) {
 			require(msg.value >= assetsAuction[assetKey].startPrice, "ExchangeAuction: bid value is lower than start price");
@@ -177,9 +177,8 @@ contract ExchangeAuction is ExchangeCore {
 		require(holder.get(assetKey) == ExchangeState.AssetType.Auction,
 				"ExchangeAuction: asset is not in auction");
 	}
-	
-	function _requireEndTime(uint256 endTime) internal view
-	{
-		require(block.timestamp >= endTime, "ExchangeAuction: aution time is not end");
+
+	function _isAuctionEnd(uint256 time) internal view returns(bool) {
+		return block.timestamp >= time;
 	}
 }

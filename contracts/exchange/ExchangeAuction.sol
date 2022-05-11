@@ -19,6 +19,7 @@ contract ExchangeAuction is ExchangeCore {
 
 	event StartAuction(bytes32 assetKey);
 	event EndAuction(bytes32 assetKey);
+	event Refund(bytes32 assetKey, address beneficiary);
 
 	TransferProxy transferProxy;
 	Holder holder;
@@ -42,15 +43,15 @@ contract ExchangeAuction is ExchangeCore {
 		address token,
 		uint256 tokenId,
 		uint256 startPrice,
-		uint256 endTime
+		uint256 time
 	) external
 	{
-		require(endTime >= block.timestamp, "ExchangeAuction#start: invalid end time");
 		require(startPrice >= LOWEST_PRICE, "ExchangeAuction#start: start price is too low");
 		IERC721 erc721 = IERC721(token);
 		address ownerOfToken = erc721.ownerOf(tokenId);
 		require(_msgSender() == ownerOfToken, "Caller is not owner of token");
 
+		uint256 endTime = block.timestamp + time;
 		bytes32 assetKey = HashAsset.hashKey(token, tokenId);
 		ExchangeDomain.AssetDomain memory assetDomain = ExchangeDomain.AssetDomain(
 			token,
@@ -92,6 +93,7 @@ contract ExchangeAuction is ExchangeCore {
 
 		ExchangeDomain.AuctionParam storage auctionParam = auctionsParam[assetKey];
 
+		emit EndAuction(assetKey);
 		// transfer highest bid
 		if (auctionParam.highestBid == 0) {
 			transferProxy.erc721SafeTransfer(IERC721(token), address(holder), asset.domain.seller, tokenId);
@@ -100,18 +102,20 @@ contract ExchangeAuction is ExchangeCore {
 		//
 		uint256 tx_fee = auctionParam.highestBid.div(25).mul(2);
 		(bool transferFee, ) = payable(address(this)).call{value: tx_fee}("");
-		require(transferFee, "ExhcangeAuction#end: transfer fee failed");
-		(bool transferBid, ) = payable(auctionParam.highestBidder).call{value: auctionParam.highestBid - tx_fee}("");
-		require(transferBid, "ExchangeAuction#end: transfer beneficiary failed");
+		require(transferFee, "ExhcangeAuction: transfer fee failed");
+		(bool transferBid, ) = payable(asset.domain.seller).call{value: auctionParam.highestBid - tx_fee}("");
+		require(transferBid, "ExchangeAuction: transfer beneficiary failed");
+		auctionParam.pendingReturns[auctionParam.highestBidder] = 0;
 		
 		// transfer token
 		transferProxy.erc721SafeTransfer(IERC721(token), address(holder), auctionParam.highestBidder, tokenId);
 		holder.set(assetKey, ExchangeState.AssetType.NULL);
 
 		// refund all
-		for (uint i = auctionParam.bidders.length - 1; i >= 0; i++) {
+		uint bidderCount = auctionParam.bidders.length;
+		for (uint i = 0; i <= bidderCount - 1; i++) {
 			_refund(assetKey, auctionParam.bidders[i]);
-			auctionParam.bidders.pop();
+			delete auctionParam.bidders[i];
 		}
 	}
 
@@ -129,17 +133,17 @@ contract ExchangeAuction is ExchangeCore {
 		if (auctionParam.highestBid == 0) {
 			require(msg.value >= assetsAuction[assetKey].startPrice, "ExchangeAuction: bid value is lower than start price");
 			_setHighestBid(auctionParam, msg.value);
-			auctionParam.bidders.push(_msgSender());
+			_newBidder(auctionParam, msg.value);
 			return;
 		}
 
 		uint bidValue = msg.value;
 		uint biddedValue = auctionParam.pendingReturns[_msgSender()];
 		if (biddedValue != 0) {
-			auctionParam.pendingReturns[_msgSender()] += bidValue;
 			bidValue += biddedValue;
+			auctionParam.pendingReturns[_msgSender()] = bidValue;
 		} else {
-			auctionParam.bidders.push(_msgSender());
+			_newBidder(auctionParam, bidValue);
 		}
 		require(bidValue >= auctionParam.highestBid, "ExchangeAuction: bid value is lower than the highest price");
 
@@ -153,24 +157,20 @@ contract ExchangeAuction is ExchangeCore {
 	function refund(bytes32 assetKey) public
 	{
 		_refund(assetKey, _msgSender());
+		emit Refund(assetKey, _msgSender());
 	}
 
 	function _refund(bytes32 assetKey, address caller) internal
 	{
-		uint256 amount = auctionsParam[assetKey].pendingReturns[caller];
+		ExchangeDomain.AuctionParam storage auctParam = auctionsParam[assetKey];
+		uint256 amount = auctParam.pendingReturns[caller];
 		if (!(amount > 0)) {
 			return;
 		}
-		(bool transferBid, ) = payable(caller).call{value: amount}("");
-		require(transferBid, "Refund failed");
-
-		delete auctionsParam[assetKey].pendingReturns[caller];
+		payable(caller).transfer(amount);
+		delete auctParam.pendingReturns[caller];
 	}
 
-	function _setHighestBid(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal {
-		auctionParam.highestBid = value;
-		auctionParam.highestBidder = _msgSender();
-	}
 	
 	function _requireAvailable(bytes32 assetKey) override internal view
 	{
@@ -178,7 +178,20 @@ contract ExchangeAuction is ExchangeCore {
 				"ExchangeAuction: asset is not in auction");
 	}
 
-	function _isAuctionEnd(uint256 time) internal view returns(bool) {
-		return block.timestamp >= time;
+	function _isAuctionEnd(uint256 endTime) internal view returns(bool)
+	{
+		return block.timestamp >= endTime;
+	}
+
+	function _setHighestBid(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal
+	{
+		auctionParam.highestBid = value;
+		auctionParam.highestBidder = _msgSender();
+	}
+
+	function _newBidder(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal
+	{
+		auctionParam.bidders.push(_msgSender());
+		auctionParam.pendingReturns[_msgSender()] = value;
 	}
 }

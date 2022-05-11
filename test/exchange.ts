@@ -8,7 +8,6 @@ import { contractFactory } from "../utils";
 import { mintERC721Token } from "./utils/mintToken";
 import { addOwnableOperatorRole } from "./utils/operatorRole";
 import { AssetAuction, AssetSell, AssetType } from "../model/Asset.model";
-import delay from "delay";
 
 // signers
 let signers: SignerWithAddress[];
@@ -22,12 +21,14 @@ let Holder: ContractFactory;
 let TransferProxy: ContractFactory;
 let ExchangeSell: ContractFactory;
 let ExchangeAuction: ContractFactory;
+let Exchange: ContractFactory;
 let ERC721Land: ContractFactory;
 let mockExchangeIns: Contract;
 let holderIns: Contract;
 let transferProxyIns: Contract;
 let exchangeSellIns: Contract;
 let exchangeAuctionIns: Contract;
+let exchangeIns: Contract;
 let erc721LandIns: Contract;
 
 before(async () => {
@@ -37,6 +38,16 @@ before(async () => {
 	MockExchange = await ethers.getContractFactory(
 		contractFactory.MockExchangeCore
 	);
+	Holder = await ethers.getContractFactory(contractFactory.Holder);
+	TransferProxy = await ethers.getContractFactory(
+		contractFactory.TransferProxy
+	);
+	ExchangeSell = await ethers.getContractFactory(contractFactory.ExchangeSell);
+	ExchangeAuction = await ethers.getContractFactory(
+		contractFactory.ExchangeAuction
+	);
+	ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
+	Exchange = await ethers.getContractFactory(contractFactory.Exchange);
 });
 
 describe("# ExchangeCore", () => {
@@ -101,14 +112,6 @@ describe("# ExchangeSell", () => {
 
 	before(async () => {
 		minter = signers[4];
-		Holder = await ethers.getContractFactory(contractFactory.Holder);
-		TransferProxy = await ethers.getContractFactory(
-			contractFactory.TransferProxy
-		);
-		ExchangeSell = await ethers.getContractFactory(
-			contractFactory.ExchangeSell
-		);
-		ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
 	});
 
 	beforeEach(async () => {
@@ -126,6 +129,18 @@ describe("# ExchangeSell", () => {
 			transferProxyIns.address,
 			holderIns.address
 		);
+		exchangeAuctionIns = await ExchangeAuction.connect(owner).deploy(
+			transferProxyIns.address,
+			holderIns.address
+		);
+		await exchangeSellIns.deployed();
+		await exchangeAuctionIns.deployed();
+		exchangeIns = await Exchange.connect(owner).deploy(
+			exchangeAuctionIns.address,
+			exchangeSellIns.address,
+			holderIns.address
+		);
+		await exchangeIns.deployed();
 		// mint token
 		await mintERC721Token(
 			erc721LandIns.connect(minter),
@@ -171,7 +186,7 @@ describe("# ExchangeSell", () => {
 				.list(asset.domain.token, asset.domain.tokenId, asset.price);
 
 			await expect(tx).to.be.revertedWith(
-				"ExchangeSell#_validateOwnerOfToken: caller must be owner of token"
+				"ExchangeSell: caller is not owner of token"
 			);
 		});
 
@@ -229,9 +244,27 @@ describe("# ExchangeSell", () => {
 		});
 	});
 
+	it("should allow to purchase through Exchange contract", async () => {
+		const buyer = signers[7];
+		const amount = asset.price;
+		await (
+			await exchangeSellIns
+				.connect(minter)
+				.list(asset.domain.token, asset.domain.tokenId, asset.price)
+		).wait();
+		const tx = await exchangeIns
+			.connect(buyer)
+			.bid(asset.domain.token, asset.domain.tokenId, { value: amount });
+		await tx.wait();
+
+		expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
+			buyer.address
+		);
+	});
+
 	it("should NOT allow to purchase with insufficient bid value", async () => {
 		const buyer = signers[7];
-		const amount = asset.price.toBigInt() - BigNumber.from("10000").toBigInt();
+		const amount = asset.price.sub(BigNumber.from("10000"));
 		// list asset
 		await (
 			await exchangeSellIns
@@ -266,17 +299,6 @@ describe("# ExchangeAuction", () => {
 	);
 	let asset: AssetAuction;
 
-	before(async () => {
-		Holder = await ethers.getContractFactory(contractFactory.Holder);
-		TransferProxy = await ethers.getContractFactory(
-			contractFactory.TransferProxy
-		);
-		ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
-		ExchangeAuction = await ethers.getContractFactory(
-			contractFactory.ExchangeAuction
-		);
-	});
-
 	beforeEach(async () => {
 		minter = signers[4];
 		// deployed
@@ -294,6 +316,19 @@ describe("# ExchangeAuction", () => {
 		exchangeAuctionIns = await (
 			await ExchangeAuction.connect(owner).deploy(
 				transferProxyIns.address,
+				holderIns.address
+			)
+		).deployed();
+		exchangeSellIns = await (
+			await ExchangeSell.connect(owner).deploy(
+				transferProxyIns.address,
+				holderIns.address
+			)
+		).deployed();
+		exchangeIns = await (
+			await Exchange.connect(owner).deploy(
+				exchangeAuctionIns.address,
+				exchangeSellIns.address,
 				holderIns.address
 			)
 		).deployed();
@@ -324,9 +359,7 @@ describe("# ExchangeAuction", () => {
 	describe("start auction", () => {
 		let tx: any;
 		beforeEach(async () => {
-			asset.endTime = BigNumber.from(
-				Math.round((Date.now() + new Date().getTimezoneOffset()) / 1000) + 150
-			);
+			asset.endTime = BigNumber.from(3);
 			tx = await exchangeAuctionIns
 				.connect(minter)
 				.start(
@@ -377,6 +410,45 @@ describe("# ExchangeAuction", () => {
 			expect(auctionParam.highestBidder).to.be.equal(bidder.address);
 		});
 
+		it("should allow to bid asset auction through Exchange contract", async () => {
+			const bidder = signers[8];
+			const bidAmount = asset.startPrice.add(BigNumber.from("1200000"));
+
+			const tx = await exchangeIns
+				.connect(bidder)
+				.bid(asset.domain.token, asset.domain.tokenId, { value: bidAmount });
+			await tx.wait();
+
+			expect(
+				(await exchangeAuctionIns.auctionsParam(asset.bytes32HashKey))
+					.highestBidder
+			).to.be.equal(bidder.address);
+		});
+
+		it("should calc old bid value", async () => {
+			const bidder = signers[7];
+			const preAmount = asset.startPrice.toBigInt();
+			const addAmount = ethers.utils.parseEther("0.001");
+
+			await (
+				await exchangeAuctionIns
+					.connect(bidder)
+					.bid(asset.bytes32HashKey, { value: preAmount })
+			).wait();
+
+			const tx = await exchangeAuctionIns
+				.connect(bidder)
+				.bid(asset.bytes32HashKey, { value: addAmount });
+			await tx.wait();
+
+			const auctionParam = await exchangeAuctionIns.auctionsParam(
+				asset.bytes32HashKey
+			);
+			expect(auctionParam.highestBid).to.be.equal(
+				preAmount + addAmount.toBigInt()
+			);
+		});
+
 		it("should NOT allow to bid with value is lower than start price", async () => {
 			const bidder = signers[8];
 			const amount =
@@ -421,12 +493,154 @@ describe("# ExchangeAuction", () => {
 				asset.startPrice.toBigInt() +
 				ethers.utils.parseEther("0.0001").toBigInt();
 
-			await delay(30000);
+			// sleep 4s
+			await new Promise((resolve) => setTimeout(resolve, 4000));
 
 			const tx = exchangeAuctionIns
 				.connect(bidder)
 				.bid(asset.bytes32HashKey, { value: amount });
 			await expect(tx).to.be.revertedWith("ExchangeAuction: auction is ended");
+		});
+	});
+
+	describe("end auction", () => {
+		beforeEach(async () => {
+			// init asset endTime
+			asset.endTime = BigNumber.from(3);
+			// start auction
+			await (
+				await exchangeAuctionIns
+					.connect(minter)
+					.start(
+						asset.domain.token,
+						asset.domain.tokenId,
+						asset.startPrice,
+						asset.endTime
+					)
+			).wait();
+		});
+
+		it("should allow transfer to seller when no-one bid", async () => {
+			// sleep 4s
+			await new Promise((resolve) => setTimeout(resolve, 4000));
+			// end auction
+			const tx = await exchangeAuctionIns
+				.connect(minter)
+				.end(asset.domain.token, asset.domain.tokenId);
+
+			await tx.wait();
+
+			expect(tx)
+				.to.emit(exchangeAuctionIns, "EndAuction")
+				.withArgs(asset.bytes32HashKey);
+			expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
+				minter.address
+			);
+		});
+
+		it("should allow transfer to highest bidder", async () => {
+			// bid
+			const bidder = signers[8];
+			const bidAmount =
+				asset.startPrice.toBigInt() +
+				ethers.utils.parseEther("0.01").toBigInt();
+			await (
+				await exchangeAuctionIns
+					.connect(bidder)
+					.bid(asset.bytes32HashKey, { value: bidAmount })
+			).wait();
+			// sleep 4s
+			await new Promise((resolve) => setTimeout(resolve, 4000));
+
+			const tx = await exchangeAuctionIns
+				.connect(minter)
+				.end(asset.domain.token, asset.domain.tokenId);
+			await tx.wait();
+
+			expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
+				bidder.address
+			);
+		});
+	});
+
+	describe("refund auction", async () => {
+		beforeEach(async () => {
+			asset.endTime = BigNumber.from(4);
+			await (
+				await exchangeAuctionIns
+					.connect(minter)
+					.start(
+						asset.domain.token,
+						asset.domain.tokenId,
+						asset.startPrice,
+						asset.endTime
+					)
+			).wait();
+		});
+
+		it("should allow bidder to refund", async () => {
+			const bidder1 = signers[8];
+			const bidder2 = signers[9];
+			const bidAmount1 =
+				asset.startPrice.toBigInt() + ethers.utils.parseEther("1").toBigInt();
+			const bidAmount2 = bidAmount1 + ethers.utils.parseEther("2").toBigInt();
+
+			// bid 1
+			await (
+				await exchangeAuctionIns
+					.connect(bidder1)
+					.bid(asset.bytes32HashKey, { value: bidAmount1 })
+			).wait();
+			// bid 2
+			await (
+				await exchangeAuctionIns
+					.connect(bidder2)
+					.bid(asset.bytes32HashKey, { value: bidAmount2 })
+			).wait();
+
+			const auctionInsFromBidder1 = exchangeAuctionIns.connect(bidder1);
+			const tx = await auctionInsFromBidder1.refund(asset.bytes32HashKey);
+			await expect(tx)
+				.to.changeEtherBalance(bidder1, bidAmount1)
+				.to.be.emit(auctionInsFromBidder1, "Refund")
+				.withArgs(asset.bytes32HashKey, bidder1.address);
+		});
+
+		it("should refund all bidders when auction end", async () => {
+			const [bidder1, bidder2, bidder3] = [signers[8], signers[9], signers[10]];
+			const bidAmount1 = asset.startPrice.add(ethers.utils.parseEther("1"));
+			const bidAmount2 = bidAmount1.add(ethers.utils.parseEther("3"));
+			const bidAmount3 = bidAmount2.add(ethers.utils.parseEther("4.2"));
+
+			// bids
+			//#region bid 3 times
+			await (
+				await exchangeAuctionIns
+					.connect(bidder1)
+					.bid(asset.bytes32HashKey, { value: bidAmount1 })
+			).wait();
+			await (
+				await exchangeAuctionIns
+					.connect(bidder2)
+					.bid(asset.bytes32HashKey, { value: bidAmount2 })
+			).wait();
+			await (
+				await exchangeAuctionIns
+					.connect(bidder3)
+					.bid(asset.bytes32HashKey, { value: bidAmount3 })
+			).wait();
+			//#endregion bid 3 times
+
+			await new Promise((r) => setTimeout(r, 5000));
+
+			const tx = await exchangeAuctionIns
+				.connect(minter)
+				.end(asset.domain.token, asset.domain.tokenId);
+
+			await expect(tx).to.changeEtherBalances(
+				[bidder1, bidder2],
+				[bidAmount1, bidAmount2]
+			);
 		});
 	});
 });

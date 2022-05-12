@@ -8,7 +8,6 @@ import { contractFactory } from "../utils";
 import { mintERC721Token } from "./utils/mintToken";
 import { addOwnableOperatorRole } from "./utils/operatorRole";
 import { AssetAuction, AssetSell, AssetType } from "../model/Asset.model";
-import delay from "delay";
 
 // signers
 let signers: SignerWithAddress[];
@@ -324,9 +323,7 @@ describe("# ExchangeAuction", () => {
 	describe("start auction", () => {
 		let tx: any;
 		beforeEach(async () => {
-			asset.endTime = BigNumber.from(
-				Math.round((Date.now() + new Date().getTimezoneOffset()) / 1000) + 150
-			);
+			asset.endTime = BigNumber.from(3);
 			tx = await exchangeAuctionIns
 				.connect(minter)
 				.start(
@@ -445,12 +442,47 @@ describe("# ExchangeAuction", () => {
 				asset.startPrice.toBigInt() +
 				ethers.utils.parseEther("0.0001").toBigInt();
 
-			await delay(30000);
+			// sleep 4s
+			await new Promise((resolve) => setTimeout(resolve, 4000));
 
 			const tx = exchangeAuctionIns
 				.connect(bidder)
 				.bid(asset.bytes32HashKey, { value: amount });
 			await expect(tx).to.be.revertedWith("ExchangeAuction: auction is ended");
+		});
+	});
+
+	describe("end auction", () => {
+		beforeEach(async () => {
+			// init asset endTime
+			asset.endTime = BigNumber.from(3);
+			// start auction
+			await (
+				await exchangeAuctionIns
+					.connect(minter)
+					.start(
+						asset.domain.token,
+						asset.domain.tokenId,
+						asset.startPrice,
+						asset.endTime
+					)
+			).wait();
+		});
+
+		it("allow transfer to seller when no-one bid", async () => {
+			await new Promise((resolve) => setTimeout(resolve, 4000));
+			const tx = await exchangeAuctionIns
+				.connect(minter)
+				.end(asset.domain.token, asset.domain.tokenId);
+
+			await tx.wait();
+
+			expect(tx)
+				.to.emit(exchangeAuctionIns, "EndAuction")
+				.withArgs(asset.bytes32HashKey);
+			expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
+				minter.address
+			);
 		});
 	});
 });

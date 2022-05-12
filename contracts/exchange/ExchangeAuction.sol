@@ -9,8 +9,6 @@ import "./Holder.sol";
 import "../libs/HashAsset.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import "hardhat/console.sol";
-
 contract ExchangeAuction is ExchangeCore {
 	using SafeMath for uint256;
 
@@ -19,6 +17,7 @@ contract ExchangeAuction is ExchangeCore {
 
 	event StartAuction(bytes32 assetKey);
 	event EndAuction(bytes32 assetKey);
+	event Refund(bytes32 assetKey, address beneficiary);
 
 	TransferProxy transferProxy;
 	Holder holder;
@@ -42,15 +41,15 @@ contract ExchangeAuction is ExchangeCore {
 		address token,
 		uint256 tokenId,
 		uint256 startPrice,
-		uint256 endTime
+		uint256 time
 	) external
 	{
-		require(endTime >= block.timestamp, "ExchangeAuction#start: invalid end time");
 		require(startPrice >= LOWEST_PRICE, "ExchangeAuction#start: start price is too low");
 		IERC721 erc721 = IERC721(token);
 		address ownerOfToken = erc721.ownerOf(tokenId);
 		require(_msgSender() == ownerOfToken, "Caller is not owner of token");
 
+		uint256 endTime = block.timestamp + time;
 		bytes32 assetKey = HashAsset.hashKey(token, tokenId);
 		ExchangeDomain.AssetDomain memory assetDomain = ExchangeDomain.AssetDomain(
 			token,
@@ -92,6 +91,7 @@ contract ExchangeAuction is ExchangeCore {
 
 		ExchangeDomain.AuctionParam storage auctionParam = auctionsParam[assetKey];
 
+		emit EndAuction(assetKey);
 		// transfer highest bid
 		if (auctionParam.highestBid == 0) {
 			transferProxy.erc721SafeTransfer(IERC721(token), address(holder), asset.domain.seller, tokenId);
@@ -153,6 +153,7 @@ contract ExchangeAuction is ExchangeCore {
 	function refund(bytes32 assetKey) public
 	{
 		_refund(assetKey, _msgSender());
+		emit Refund(assetKey, _msgSender());
 	}
 
 	function _refund(bytes32 assetKey, address caller) internal
@@ -178,8 +179,8 @@ contract ExchangeAuction is ExchangeCore {
 				"ExchangeAuction: asset is not in auction");
 	}
 
-	function _isAuctionEnd(uint256 time) internal view returns(bool) {
-		return block.timestamp >= time;
+	function _isAuctionEnd(uint256 endTime) internal view returns(bool) {
+		return block.timestamp >= endTime;
 	}
 
 	function _newBidder(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal {

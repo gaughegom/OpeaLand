@@ -9,6 +9,8 @@ import "./Holder.sol";
 import "../libs/HashAsset.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "hardhat/console.sol";
+
 contract ExchangeAuction is ExchangeCore {
 	using SafeMath for uint256;
 
@@ -100,16 +102,17 @@ contract ExchangeAuction is ExchangeCore {
 		//
 		uint256 tx_fee = auctionParam.highestBid.div(25).mul(2);
 		(bool transferFee, ) = payable(address(this)).call{value: tx_fee}("");
-		require(transferFee, "ExhcangeAuction#end: transfer fee failed");
-		(bool transferBid, ) = payable(auctionParam.highestBidder).call{value: auctionParam.highestBid - tx_fee}("");
-		require(transferBid, "ExchangeAuction#end: transfer beneficiary failed");
+		require(transferFee, "ExhcangeAuction: transfer fee failed");
+		(bool transferBid, ) = payable(asset.domain.seller).call{value: auctionParam.highestBid - tx_fee}("");
+		require(transferBid, "ExchangeAuction: transfer beneficiary failed");
+		auctionParam.pendingReturns[auctionParam.highestBidder] = 0;
 		
 		// transfer token
 		transferProxy.erc721SafeTransfer(IERC721(token), address(holder), auctionParam.highestBidder, tokenId);
 		holder.set(assetKey, ExchangeState.AssetType.NULL);
 
 		// refund all
-		for (uint i = auctionParam.bidders.length - 1; i >= 0; i++) {
+		for (uint i = auctionParam.bidders.length - 1; i > 0; i--) {
 			_refund(assetKey, auctionParam.bidders[i]);
 			auctionParam.bidders.pop();
 		}

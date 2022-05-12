@@ -469,8 +469,10 @@ describe("# ExchangeAuction", () => {
 			).wait();
 		});
 
-		it("allow transfer to seller when no-one bid", async () => {
+		it("should allow transfer to seller when no-one bid", async () => {
+			// sleep 4s
 			await new Promise((resolve) => setTimeout(resolve, 4000));
+			// end auction
 			const tx = await exchangeAuctionIns
 				.connect(minter)
 				.end(asset.domain.token, asset.domain.tokenId);
@@ -482,6 +484,30 @@ describe("# ExchangeAuction", () => {
 				.withArgs(asset.bytes32HashKey);
 			expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
 				minter.address
+			);
+		});
+
+		it("should allow transfer to highest bidder", async () => {
+			// bid
+			const bidder = signers[8];
+			const bidAmount =
+				asset.startPrice.toBigInt() +
+				ethers.utils.parseEther("0.01").toBigInt();
+			await (
+				await exchangeAuctionIns
+					.connect(bidder)
+					.bid(asset.bytes32HashKey, { value: bidAmount })
+			).wait();
+			// sleep 4s
+			await new Promise((resolve) => setTimeout(resolve, 4000));
+
+			const tx = await exchangeAuctionIns
+				.connect(minter)
+				.end(asset.domain.token, asset.domain.tokenId);
+			await tx.wait();
+
+			expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
+				bidder.address
 			);
 		});
 	});

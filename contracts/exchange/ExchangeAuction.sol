@@ -112,9 +112,10 @@ contract ExchangeAuction is ExchangeCore {
 		holder.set(assetKey, ExchangeState.AssetType.NULL);
 
 		// refund all
-		for (uint i = auctionParam.bidders.length - 1; i > 0; i--) {
+		uint bidderCount = auctionParam.bidders.length;
+		for (uint i = 0; i <= bidderCount - 1; i++) {
 			_refund(assetKey, auctionParam.bidders[i]);
-			auctionParam.bidders.pop();
+			delete auctionParam.bidders[i];
 		}
 	}
 
@@ -161,17 +162,17 @@ contract ExchangeAuction is ExchangeCore {
 
 	function _refund(bytes32 assetKey, address caller) internal
 	{
-		uint256 amount = auctionsParam[assetKey].pendingReturns[caller];
+		ExchangeDomain.AuctionParam storage auctParam = auctionsParam[assetKey];
+		uint256 amount = auctParam.pendingReturns[caller];
 		if (!(amount > 0)) {
 			return;
 		}
-		(bool transferBid, ) = payable(caller).call{value: amount}("");
-		require(transferBid, "Refund failed");
-
-		delete auctionsParam[assetKey].pendingReturns[caller];
+		payable(caller).transfer(amount);
+		delete auctParam.pendingReturns[caller];
 	}
 
-	function _setHighestBid(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal {
+	function _setHighestBid(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal
+	{
 		auctionParam.highestBid = value;
 		auctionParam.highestBidder = _msgSender();
 	}
@@ -182,11 +183,13 @@ contract ExchangeAuction is ExchangeCore {
 				"ExchangeAuction: asset is not in auction");
 	}
 
-	function _isAuctionEnd(uint256 endTime) internal view returns(bool) {
+	function _isAuctionEnd(uint256 endTime) internal view returns(bool)
+	{
 		return block.timestamp >= endTime;
 	}
 
-	function _newBidder(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal {
+	function _newBidder(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal
+	{
 		auctionParam.bidders.push(_msgSender());
 		auctionParam.pendingReturns[_msgSender()] = value;
 	}

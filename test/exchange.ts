@@ -511,4 +511,85 @@ describe("# ExchangeAuction", () => {
 			);
 		});
 	});
+
+	describe("refund auction", async () => {
+		beforeEach(async () => {
+			asset.endTime = BigNumber.from(4);
+			await (
+				await exchangeAuctionIns
+					.connect(minter)
+					.start(
+						asset.domain.token,
+						asset.domain.tokenId,
+						asset.startPrice,
+						asset.endTime
+					)
+			).wait();
+		});
+
+		it("should allow bidder to refund", async () => {
+			const bidder1 = signers[8];
+			const bidder2 = signers[9];
+			const bidAmount1 =
+				asset.startPrice.toBigInt() + ethers.utils.parseEther("1").toBigInt();
+			const bidAmount2 = bidAmount1 + ethers.utils.parseEther("2").toBigInt();
+
+			// bid 1
+			await (
+				await exchangeAuctionIns
+					.connect(bidder1)
+					.bid(asset.bytes32HashKey, { value: bidAmount1 })
+			).wait();
+			// bid 2
+			await (
+				await exchangeAuctionIns
+					.connect(bidder2)
+					.bid(asset.bytes32HashKey, { value: bidAmount2 })
+			).wait();
+
+			const auctionInsFromBidder1 = exchangeAuctionIns.connect(bidder1);
+			const tx = await auctionInsFromBidder1.refund(asset.bytes32HashKey);
+			await expect(tx)
+				.to.changeEtherBalance(bidder1, bidAmount1)
+				.to.be.emit(auctionInsFromBidder1, "Refund")
+				.withArgs(asset.bytes32HashKey, bidder1.address);
+		});
+
+		it("should refund all bidders when auction end", async () => {
+			const [bidder1, bidder2, bidder3] = [signers[8], signers[9], signers[10]];
+			const bidAmount1 = asset.startPrice.add(ethers.utils.parseEther("1"));
+			const bidAmount2 = bidAmount1.add(ethers.utils.parseEther("3"));
+			const bidAmount3 = bidAmount2.add(ethers.utils.parseEther("4.2"));
+
+			// bids
+			//#region bid 3 times
+			await (
+				await exchangeAuctionIns
+					.connect(bidder1)
+					.bid(asset.bytes32HashKey, { value: bidAmount1 })
+			).wait();
+			await (
+				await exchangeAuctionIns
+					.connect(bidder2)
+					.bid(asset.bytes32HashKey, { value: bidAmount2 })
+			).wait();
+			await (
+				await exchangeAuctionIns
+					.connect(bidder3)
+					.bid(asset.bytes32HashKey, { value: bidAmount3 })
+			).wait();
+			//#endregion bid 3 times
+
+			await new Promise((r) => setTimeout(r, 5000));
+
+			const tx = await exchangeAuctionIns
+				.connect(minter)
+				.end(asset.domain.token, asset.domain.tokenId);
+
+			await expect(tx).to.changeEtherBalances(
+				[bidder1, bidder2],
+				[bidAmount1, bidAmount2]
+			);
+		});
+	});
 });

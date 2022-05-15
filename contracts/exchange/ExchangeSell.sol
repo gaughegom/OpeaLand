@@ -37,9 +37,8 @@ contract ExchangeSell is ExchangeCore {
 	 */
 	function list(address token, uint256 tokenId, uint256 price) external 
 	{
-		IERC721 erc721 = IERC721(token);
 		// validate
-		address ownerOfToken = _validateOwnerOfToken(erc721, tokenId);
+		address ownerOfToken = _requireOwnerOfToken(token, tokenId);
 		require(price >= LOWEST_PRICE, "ExchangeSell#list: asset price is too low");
 
 		bytes32 assetKey = HashAsset.hashKey(token, tokenId);
@@ -50,7 +49,7 @@ contract ExchangeSell is ExchangeCore {
 
 		// transfer to holder
 		transferProxy.erc721SafeTransfer(
-			erc721,
+			IERC721(token),
 			ownerOfToken,
 			address(holder),
 			tokenId);
@@ -93,9 +92,9 @@ contract ExchangeSell is ExchangeCore {
 		require(msg.value >= asset.price, "ExchangeSell#purchase: insufficient value");
 
 		(bool transferFee, ) = payable(address(this)).call{value: TX_FEE}("");
-		require(transferFee, "ExchangeSell#purchase: transfer fee failed");
+		require(transferFee, "transfer fee failed");
 		(bool transferValue, ) = asset.domain.seller.call{value: msg.value - TX_FEE}("");
-		require(transferValue, "ExchangeSell#purchase: transfer failed");
+		require(transferValue, "transfer selling failed");
 
 		// transfer asset token to buyer
 		transferProxy.erc721SafeTransfer(
@@ -132,10 +131,15 @@ contract ExchangeSell is ExchangeCore {
 				"ExchangeSell#delist: asset is not listed");
 	}
 
-	function _validateOwnerOfToken(IERC721 erc721, uint256 tokenId) internal view returns(address)
+	function _requireOwnerOfToken(address token, uint256 tokenId) override internal view returns(address){
+		address owner = _ownerOfToken(IERC721(token), tokenId);
+		require(owner == _msgSender(),
+				"ExchangeSell: caller is not owner of token");
+		return owner;
+	}
+
+	function _ownerOfToken(IERC721 erc721, uint256 tokenId) internal view returns(address)
 	{
-		address ownerOfToken = erc721.ownerOf(tokenId);
-		require(ownerOfToken == _msgSender(), "ExchangeSell#_validateOwnerOfToken: caller must be owner of token");
-		return ownerOfToken;
+		return erc721.ownerOf(tokenId);
 	}
 }

@@ -3,6 +3,7 @@ const contractFactory = {
 	Migration: "Migration",
 	ExchangeSell: "ExchangeSell",
 	ExchangeAuction: "ExchangeAuction",
+	Exchange: "Exchange",
 	TransferProxy: "TransferProxy",
 	Holder: "Holder",
 	OwnableOperatorRole: "OwnableOperatorRole",

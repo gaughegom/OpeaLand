@@ -21,12 +21,14 @@ let Holder: ContractFactory;
 let TransferProxy: ContractFactory;
 let ExchangeSell: ContractFactory;
 let ExchangeAuction: ContractFactory;
+let Exchange: ContractFactory;
 let ERC721Land: ContractFactory;
 let mockExchangeIns: Contract;
 let holderIns: Contract;
 let transferProxyIns: Contract;
 let exchangeSellIns: Contract;
 let exchangeAuctionIns: Contract;
+let exchangeIns: Contract;
 let erc721LandIns: Contract;
 
 before(async () => {
@@ -36,6 +38,16 @@ before(async () => {
 	MockExchange = await ethers.getContractFactory(
 		contractFactory.MockExchangeCore
 	);
+	Holder = await ethers.getContractFactory(contractFactory.Holder);
+	TransferProxy = await ethers.getContractFactory(
+		contractFactory.TransferProxy
+	);
+	ExchangeSell = await ethers.getContractFactory(contractFactory.ExchangeSell);
+	ExchangeAuction = await ethers.getContractFactory(
+		contractFactory.ExchangeAuction
+	);
+	ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
+	Exchange = await ethers.getContractFactory(contractFactory.Exchange);
 });
 
 describe("# ExchangeCore", () => {
@@ -100,14 +112,6 @@ describe("# ExchangeSell", () => {
 
 	before(async () => {
 		minter = signers[4];
-		Holder = await ethers.getContractFactory(contractFactory.Holder);
-		TransferProxy = await ethers.getContractFactory(
-			contractFactory.TransferProxy
-		);
-		ExchangeSell = await ethers.getContractFactory(
-			contractFactory.ExchangeSell
-		);
-		ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
 	});
 
 	beforeEach(async () => {
@@ -125,6 +129,18 @@ describe("# ExchangeSell", () => {
 			transferProxyIns.address,
 			holderIns.address
 		);
+		exchangeAuctionIns = await ExchangeAuction.connect(owner).deploy(
+			transferProxyIns.address,
+			holderIns.address
+		);
+		await exchangeSellIns.deployed();
+		await exchangeAuctionIns.deployed();
+		exchangeIns = await Exchange.connect(owner).deploy(
+			exchangeAuctionIns.address,
+			exchangeSellIns.address,
+			holderIns.address
+		);
+		await exchangeIns.deployed();
 		// mint token
 		await mintERC721Token(
 			erc721LandIns.connect(minter),
@@ -170,7 +186,7 @@ describe("# ExchangeSell", () => {
 				.list(asset.domain.token, asset.domain.tokenId, asset.price);
 
 			await expect(tx).to.be.revertedWith(
-				"ExchangeSell#_validateOwnerOfToken: caller must be owner of token"
+				"ExchangeSell: caller is not owner of token"
 			);
 		});
 
@@ -228,9 +244,27 @@ describe("# ExchangeSell", () => {
 		});
 	});
 
+	it("should allow to purchase through Exchange contract", async () => {
+		const buyer = signers[7];
+		const amount = asset.price;
+		await (
+			await exchangeSellIns
+				.connect(minter)
+				.list(asset.domain.token, asset.domain.tokenId, asset.price)
+		).wait();
+		const tx = await exchangeIns
+			.connect(buyer)
+			.bid(asset.domain.token, asset.domain.tokenId, { value: amount });
+		await tx.wait();
+
+		expect(await erc721LandIns.ownerOf(asset.domain.tokenId)).to.be.equal(
+			buyer.address
+		);
+	});
+
 	it("should NOT allow to purchase with insufficient bid value", async () => {
 		const buyer = signers[7];
-		const amount = asset.price.toBigInt() - BigNumber.from("10000").toBigInt();
+		const amount = asset.price.sub(BigNumber.from("10000"));
 		// list asset
 		await (
 			await exchangeSellIns
@@ -265,17 +299,6 @@ describe("# ExchangeAuction", () => {
 	);
 	let asset: AssetAuction;
 
-	before(async () => {
-		Holder = await ethers.getContractFactory(contractFactory.Holder);
-		TransferProxy = await ethers.getContractFactory(
-			contractFactory.TransferProxy
-		);
-		ERC721Land = await ethers.getContractFactory(contractFactory.ERC721Land);
-		ExchangeAuction = await ethers.getContractFactory(
-			contractFactory.ExchangeAuction
-		);
-	});
-
 	beforeEach(async () => {
 		minter = signers[4];
 		// deployed
@@ -293,6 +316,19 @@ describe("# ExchangeAuction", () => {
 		exchangeAuctionIns = await (
 			await ExchangeAuction.connect(owner).deploy(
 				transferProxyIns.address,
+				holderIns.address
+			)
+		).deployed();
+		exchangeSellIns = await (
+			await ExchangeSell.connect(owner).deploy(
+				transferProxyIns.address,
+				holderIns.address
+			)
+		).deployed();
+		exchangeIns = await (
+			await Exchange.connect(owner).deploy(
+				exchangeAuctionIns.address,
+				exchangeSellIns.address,
 				holderIns.address
 			)
 		).deployed();
@@ -372,6 +408,21 @@ describe("# ExchangeAuction", () => {
 			);
 			expect(auctionParam.highestBid).to.be.equal(bidAmount);
 			expect(auctionParam.highestBidder).to.be.equal(bidder.address);
+		});
+
+		it("should allow to bid asset auction through Exchange contract", async () => {
+			const bidder = signers[8];
+			const bidAmount = asset.startPrice.add(BigNumber.from("1200000"));
+
+			const tx = await exchangeIns
+				.connect(bidder)
+				.bid(asset.domain.token, asset.domain.tokenId, { value: bidAmount });
+			await tx.wait();
+
+			expect(
+				(await exchangeAuctionIns.auctionsParam(asset.bytes32HashKey))
+					.highestBidder
+			).to.be.equal(bidder.address);
 		});
 
 		it("should calc old bid value", async () => {

@@ -171,11 +171,6 @@ contract ExchangeAuction is ExchangeCore {
 		delete auctParam.pendingReturns[caller];
 	}
 
-	function _setHighestBid(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal
-	{
-		auctionParam.highestBid = value;
-		auctionParam.highestBidder = _msgSender();
-	}
 	
 	function _requireAvailable(bytes32 assetKey) override internal view
 	{
@@ -186,6 +181,12 @@ contract ExchangeAuction is ExchangeCore {
 	function _isAuctionEnd(uint256 endTime) internal view returns(bool)
 	{
 		return block.timestamp >= endTime;
+	}
+
+	function _setHighestBid(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal
+	{
+		auctionParam.highestBid = value;
+		auctionParam.highestBidder = _msgSender();
 	}
 
 	function _newBidder(ExchangeDomain.AuctionParam storage auctionParam, uint256 value) internal

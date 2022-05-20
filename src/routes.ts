@@ -4,7 +4,7 @@ import React from "react";
 // const ForgotPasswordPage = React.lazy(() => import("./features/forgotPassword"))
 // const ResetPasswordPage = React.lazy(() => import("./features/resetPassword"))
 
-const publicRoute = [
+const publicRoute: any = [
     // {
     //     path: "/counter",
     //     name: "Counter",
@@ -17,13 +17,13 @@ const publicRoute = [
     // },
 ];
 
-const commonRoute = [];
+const commonRoute: any = [];
 
-const protectedRoute = [
+const protectedRoute: any = [
 
 ];
 
-const managerRoute = [];
+const managerRoute:any = [];
 
 const routes = {
     publicRoute,

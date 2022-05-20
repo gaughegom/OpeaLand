@@ -1,6 +1,6 @@
 import React from "react";
 
-function Exam() {
+const Exam = () => {
     return (
         <div>
             test exam

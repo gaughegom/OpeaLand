@@ -4,7 +4,7 @@ import routes from "../routes";
 import React from "react";
 
 // import page
-const ExamPage = React.lazy(() => import("./example"));
+const ExamPage = React.lazy(() => import("../features/header"));
 
 // waiting
 const loading = (

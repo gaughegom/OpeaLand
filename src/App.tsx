@@ -5,7 +5,7 @@ import Routers from "./routers";
 
 const theme = createTheme({
     typography: {
-        fontFamily: ["Montserrat", "cursive"].join(","),
+        fontFamily: ["Poppins", "cursive"].join(","),
     },
 });
 

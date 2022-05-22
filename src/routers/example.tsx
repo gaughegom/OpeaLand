@@ -2,8 +2,8 @@ import React from "react";
 
 const Exam = () => {
     return (
-        <div>
-            test exam
+        <div style={{fontWeight: "bold"}}>
+            Explore
         </div>
     )
 }

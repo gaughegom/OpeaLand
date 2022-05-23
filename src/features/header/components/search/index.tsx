@@ -11,7 +11,7 @@ export default function Search() {
         >
             <SearchIcon sx={{fontSize: 24, color: "#767F88"}}/>
             <InputBase
-                sx={{ ml: 1, flex: 1, fontSize:14, color: "#737D85"}}
+                sx={{ ml: 1, flex: 1, fontSize:16, color: "#737D85"}}
                 placeholder="Search Item, Collections"
             />
         </div>

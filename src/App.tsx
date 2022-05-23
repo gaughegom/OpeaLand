@@ -1,7 +1,10 @@
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import React from "react";
+
 import { BrowserRouter } from "react-router-dom";
 import Routers from "./routers";
+
+import Header from './features/header'
 
 const theme = createTheme({
     typography: {
@@ -9,9 +12,13 @@ const theme = createTheme({
     },
 });
 
+const headerMargin = 72;
+
 function App() {
     return (
         <ThemeProvider theme={theme}>
+            <Header></Header>
+            <div style={{marginTop: headerMargin}}></div>
             <BrowserRouter>
                 <Routers />
             </BrowserRouter>

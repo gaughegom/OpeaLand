@@ -9,7 +9,6 @@ import Navigate from "./components/navigate";
 
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
-import MenuIcon from '@mui/icons-material/Menu';
 
 export default function Header() {
     return (
@@ -17,12 +16,6 @@ export default function Header() {
             <Logo></Logo>
             <Search></Search>
             <Navigate></Navigate>
-            <IconButton>
-                <AccountCircleOutlinedIcon sx={iconStyles} />
-            </IconButton>
-            <IconButton>
-                <AccountBalanceWalletOutlinedIcon sx={iconStyles} />
-            </IconButton>
             {/* <IconButton>
                 <MenuIcon sx={iconStyles} />
             </IconButton> */}

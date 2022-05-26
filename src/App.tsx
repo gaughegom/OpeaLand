@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import Routers from "./routers";
 
 import Header from './features/header'
+import Footer from './features/footer'
 
 const theme = createTheme({
     typography: {
@@ -12,13 +13,10 @@ const theme = createTheme({
     },
 });
 
-const headerMargin = 72;
 
 function App() {
     return (
         <ThemeProvider theme={theme}>
-            <Header></Header>
-            <div style={{marginTop: headerMargin}}></div>
             <BrowserRouter>
                 <Routers />
             </BrowserRouter>

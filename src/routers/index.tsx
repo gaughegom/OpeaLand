@@ -1,6 +1,9 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import routes from "../routes";
 
+import Header from "../features/header";
+import Footer from "../features/footer";
+
 import React from "react";
 
 // import page
@@ -13,9 +16,13 @@ const loading = (
     </div>
 );
 
+const headerMargin = 72;
+
 const Routers = () => {
     return (
         <React.Suspense fallback={loading}>
+            <Header></Header>
+            <div style={{marginTop: headerMargin}}></div>
             <Routes>
                 <Route path="home" element={<HomePage />} />
                 <Route index element={<Navigate to="home" />} />
@@ -31,6 +38,7 @@ const Routers = () => {
                     );
                 })} */}
             </Routes>
+            <Footer></Footer>
         </React.Suspense>
     );
 };

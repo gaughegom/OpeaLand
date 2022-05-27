@@ -22,11 +22,11 @@ const Routers = () => {
     return (
         <React.Suspense fallback={loading}>
             <Header></Header>
-            <div style={{marginTop: headerMargin}}></div>
+            <div style={{ marginTop: headerMargin }}></div>
             <Routes>
-                <Route path="home" element={<HomePage />} />
-                <Route index element={<Navigate to="home" />} />
-                {/* {routes.publicRoute.map((route, idx) => {
+                <Route path="/home" element={<HomePage />} />
+                <Route index element={<Navigate to="/home" />} />
+                {routes.publicRoute.map((route, idx) => {
                     return (
                         route.element && (
                             <Route
@@ -36,7 +36,7 @@ const Routers = () => {
                             />
                         )
                     );
-                })} */}
+                })}
             </Routes>
             <Footer></Footer>
         </React.Suspense>

@@ -21,11 +21,11 @@
     .filter {
         height: 52px;
         width: 240px;
-
-        position: relative;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+
+        position: relative;
+        align-items: center;
 
         border-radius: 12px;
         border: 2px solid #d9dfe1;
@@ -35,6 +35,14 @@
 
         &:hover {
             cursor: pointer;
+        }
+        .holder {
+            display: flex;
+            flex-direction: row;
+            flex: 1;
+
+            justify-content: space-between;
+            align-items: center;
         }
     }
 }

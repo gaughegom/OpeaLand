@@ -1,5 +1,7 @@
 .box {
     position: absolute;
+    top: 60px;
+    left: 0;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -15,16 +17,12 @@
         width: 100%;
         height: 100%;
     }
-    .group {
-        padding: 12px;
-        color: rgb(112 122 131);
-    }
     .item {
         display: flex;
         flex-direction: row;
         gap: 4px;
 
-        padding: 12px 12px;
+        padding: 12px 20px;
         font-size: 14px;
         align-items: center;
 
@@ -44,10 +42,5 @@
             flex-direction: column;
             justify-content: space-between;
         }
-    }
-    .no-result {
-        padding: 12px 20px;
-        color: black;
-        font-size: 12px;
     }
 }

@@ -13,7 +13,6 @@ export default function FilterDropdown() {
     return (
         <div className={styles.box}>
             <Grid container direction="column" className={styles.grid}>
-                <div className={styles.group}>Items</div>
                 {dropDownItem.map((item, idx) => (
                     <div className={styles.item} key={idx}>
                         {item.title}

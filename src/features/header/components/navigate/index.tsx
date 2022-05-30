@@ -71,7 +71,7 @@ export default function Navigate() {
                 </div>
             </div>
 
-            <div className={styles.item}>
+            {/* <div className={styles.item}>
                 <p>Stats</p>
                 <div className={styles["dropDownContent--left"]}>
                     {statsItem.map((item, key) => (
@@ -80,7 +80,7 @@ export default function Navigate() {
                         </p>
                     ))}
                 </div>
-            </div>
+            </div> */}
 
             <div className={styles.item}>
                 <p>Create</p>

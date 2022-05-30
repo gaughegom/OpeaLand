@@ -3,6 +3,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 72px;
+
+    width: 100%;
+    background-color: white;
+    border-bottom: 1px solid #D9DFE1;
+    z-index: 1;
 
     padding: 0 40px;
     .icon {
@@ -30,19 +37,30 @@
         border-radius: 12px;
         border: 2px solid #d9dfe1;
 
-        padding: 8px 24px;
         font-weight: 600;
 
         &:hover {
             cursor: pointer;
         }
         .holder {
+            position: relative;
             display: flex;
             flex-direction: row;
             flex: 1;
 
+            padding: 8px 24px;
+
             justify-content: space-between;
             align-items: center;
+            .text {
+                width: 100%;
+                border: none;
+            }
+            .icon_right {
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
         }
     }
 }

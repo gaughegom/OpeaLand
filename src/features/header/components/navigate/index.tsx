@@ -9,7 +9,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import GridOnIcon from "@mui/icons-material/GridOn";
 
-import {ALL_NFTS_PATH} from '../../../../routes'
+import {ALL_NFTS_PATH, COLLECTIONS_PATH} from '../../../../routes'
 
 export default function Navigate() {
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function Navigate() {
             iconLink:
                 "https://opensea.io/static/images/icons/collectibles-light.svg",
             title: "Collectibles",
-            path: "",
+            path: COLLECTIONS_PATH,
         },
     ];
     const statsItem = [

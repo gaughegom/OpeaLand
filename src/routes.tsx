@@ -1,8 +1,10 @@
 import React from "react";
 
 const AllNFTsPage = React.lazy(() => import("./features/allNFTs"));
+const Collections = React.lazy(() => import("./features/collections"))
 
 export const ALL_NFTS_PATH = '/explore-all-nfts';
+export const COLLECTIONS_PATH = '/explore-collections';
 
 type routeType = {
     path: string,
@@ -13,6 +15,10 @@ const publicRoute: routeType[] = [
     {
         path: ALL_NFTS_PATH,
         element: <AllNFTsPage />,
+    },
+    {
+        path: COLLECTIONS_PATH,
+        element: <Collections />,
     },
 ];
 

@@ -10,6 +10,9 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import GridOnIcon from "@mui/icons-material/GridOn";
 
 import {ALL_NFTS_PATH, ALL_COLLECTIONS_PATH, PROFILE_PATH} from '../../../../routes'
+import { walletConnector } from "../../../wallet/walletConnector";
+import { useAppDispatch, useAppSelector } from "../../../../hooks";
+import { setWalletProvider, WalletProvider } from "../../../wallet/walletSlice";
 
 export default function Navigate() {
     const navigate = useNavigate();
@@ -50,7 +53,32 @@ export default function Navigate() {
             path: ''
         },
     ];
-    const walletItem = [{ iconLink: "", title: "" }];
+  const walletItem = [{ iconLink: "", title: "" }];
+
+  const dispatch = useAppDispatch();
+
+  // const [wallet, setWallet] = React.useState<WalletProvider>();
+  const [isLoadWallet, setIsLoadWallet] = React.useState(false);
+  
+  const loadWallet = async () => {
+    dispatch(setWalletProvider(await walletConnector()));
+  }
+
+  React.useEffect(() => {
+    window.ethereum.on('accountsChanged', async function () {
+      dispatch(setWalletProvider(await walletConnector()));
+    })
+  }, [dispatch])
+
+  
+  React.useEffect(() => {
+    loadWallet();
+  }, [isLoadWallet])
+
+
+  const handleClickConnect = () => {
+    setIsLoadWallet(!isLoadWallet);
+  }
 
     return (
         <div className={styles.navigate}>
@@ -98,7 +126,7 @@ export default function Navigate() {
                 </div>
             </div>
 
-            <div className={styles.item}>
+            <div className={styles.item} onClick={handleClickConnect}>
                 <AccountBalanceWalletOutlinedIcon sx={iconButtonStyles} />
                 {/* <div className={styles["dropDownContent--right"]}>
                     {walletItem.map((item, key) => (

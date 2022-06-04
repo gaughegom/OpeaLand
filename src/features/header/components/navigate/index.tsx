@@ -9,7 +9,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import GridOnIcon from "@mui/icons-material/GridOn";
 
-import {ALL_NFTS_PATH, ALL_COLLECTIONS_PATH} from '../../../../routes'
+import {ALL_NFTS_PATH, ALL_COLLECTIONS_PATH, PROFILE_PATH} from '../../../../routes'
 
 export default function Navigate() {
     const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function Navigate() {
         {
             iconLink: <PersonIcon sx={{ fontSize: 24 }} />,
             title: "Profile",
-            path: '',
+            path: PROFILE_PATH,
         },
         {
             iconLink: <FavoriteBorderIcon sx={{ fontSize: 24 }} />,

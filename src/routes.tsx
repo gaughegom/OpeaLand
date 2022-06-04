@@ -4,12 +4,14 @@ const AllNFTsPage = React.lazy(() => import("./features/allNFTs"));
 const Collections = React.lazy(() => import("./features/collections"));
 const Collection = React.lazy(() => import("./features/collection"));
 const Item = React.lazy(() => import("./features/itemDetails"));
+const Profile = React.lazy(() => import("./features/profile"))
 
 export const ALL_NFTS_PATH = "/explore-all-nfts";
 export const ALL_COLLECTIONS_PATH = "/explore-collections";
 export const COLLECTION_PATH = "/collection";
 export const HOME_PATH = "/home";
 export const ITEM_PATH = "/item";
+export const PROFILE_PATH = '/profile'
 
 type routeType = {
     path: string;
@@ -37,15 +39,17 @@ const publicRoute: routeType[] = [
 
 const commonRoute: routeType[] = [];
 
-const protectedRoute: routeType[] = [];
-
-const managerRoute: routeType[] = [];
+const protectedRoute: routeType[] = [
+    {
+        path: PROFILE_PATH,
+        element: <Profile />,
+    },
+];
 
 const routes = {
     publicRoute,
     protectedRoute,
     commonRoute,
-    managerRoute,
 };
 
 export default routes;

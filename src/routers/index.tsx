@@ -36,6 +36,17 @@ const Routers = () => {
                         )
                     );
                 })}
+                {routes.protectedRoute.map((route, idx) => {
+                    return (
+                        route.element && (
+                            <Route
+                                key={idx}
+                                path={route.path}
+                                element={route.element}
+                            />
+                        )
+                    );
+                })}
             </Routes>
             <Footer></Footer>
         </React.Suspense>

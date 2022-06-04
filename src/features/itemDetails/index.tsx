@@ -19,6 +19,7 @@ const mockAPI = {
     author: "Ghost-Maker",
     isFavorite: true,
     price: 0.008,
+    status: 'bid',
     saleEnd: "6/3/2022",
     description: "Using your past experiences, evolve to become the best version of yourself in the present, taking each moment in time as a gift.",
     detail: {
@@ -94,7 +95,7 @@ export default function Item() {
                         <div className={styles.details}>
                             <div className={styles.title}>
                                 <BallotIcon sx={{ fontSize: 24 }} />
-                                <div>Description</div>
+                                <div>Details</div>
                             </div>
                             <Divider></Divider>
                             <div className = {styles.content}>
@@ -132,7 +133,7 @@ export default function Item() {
                                         fontWeight: "normal",
                                     }}
                                 >
-                                    Current price
+                                    {(mockAPI.status === 'sale') ?"Current price" : "Minimum bid"}
                                 </div>
                                 <div>{mockAPI.price} Eth</div>
                             </div>
@@ -141,7 +142,7 @@ export default function Item() {
                                 <AccountBalanceWalletIcon
                                     sx={{ fontSize: 28 }}
                                 ></AccountBalanceWalletIcon>
-                                <div>Buy now</div>
+                                <div>{(mockAPI.status === 'sale') ?"Buy now" : "Place bid"}</div>
                             </div>
                         </div>
                     </div>

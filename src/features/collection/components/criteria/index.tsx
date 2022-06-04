@@ -25,7 +25,7 @@ export const defaultCriteria = {
 export default function Criteria() {
     const dispatch = useAppDispatch();
     const criteriaData = useAppSelector(
-        (state) => state.menuAllNFTsCriteria.criteriasList
+        (state) => state.menuCollectionCriteria.criteriasList
     );
 
     const handleDelete = (criteriaToDelete: CriteriaData) => {

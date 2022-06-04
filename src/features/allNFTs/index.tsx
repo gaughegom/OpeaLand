@@ -1,4 +1,7 @@
 import React from "react";
+import { useEffect, useState } from "react";
+
+import axios from "axios";
 
 import styles from "./allNFTsStyles.module.scss";
 
@@ -9,21 +12,38 @@ import CardItem from "./components/cardItem";
 import Criteria from "./components/criteria";
 
 import { useAppSelector } from "../../hooks";
+import {ALL_ITEMS} from '../../services/APIurls'
 
-const mockAPI = {
-    thumbLink:
-        "https://lh3.googleusercontent.com/OtwsraXoy_DaUz-JDT6bSuz9WF5O_BY5_iX_Is4Hxn3dyGgtiJ8jLcEWVmrzB3tXKzHvEGJv5sNbDRZWIJDiBMh0ulkrfYseHhIwcw=w300",
-    id: "",
-    collection: "Collection Collection Collection",
-    name: "AB Name Name Name Name Name Name",
-    price: 123,
-    isFavorite: false,
-};
+type itemType = {
+    thumbLink: string,
+    id: string,
+    collection: string, 
+    name: string, 
+    author: string,
+    isFavorite: boolean,
+    price: number,
+}
+
 export default function AllNFTsPage() {
     const open = useAppSelector((state) => state.allNFTs.open);
     const criteriasList = useAppSelector(
-        (state) => state.menuCriteria.criteriasList
+        (state) => state.menuAllNFTsCriteria.criteriasList
     );
+
+    //api
+    const [items, setItem] = useState<itemType[]>([])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const newItems:itemType[]  = await (await axios.get(ALL_ITEMS)).data
+            console.log(newItems)
+            setItem(newItems)
+        };
+
+        fetchData()
+    },[])
+    //----
+
 
     return (
         <React.Fragment>
@@ -46,15 +66,15 @@ export default function AllNFTsPage() {
                                 columnSpacing={2}
                                 className={styles.boxItem}
                             >
-                                {Array.from(Array(20)).map((_, index) => (
-                                    <Grid item md={open ? 4 : 3} key={index}>
+                                {items.map((item) => (
+                                    <Grid item md={open ? 4 : 3} key={item.id}>
                                         <CardItem
-                                            thumbLink={mockAPI.thumbLink}
-                                            id = {mockAPI.id}
-                                            name = {mockAPI.name}
-                                            collection = {mockAPI.collection}
-                                            isFavorite = {mockAPI.isFavorite} 
-                                            price = {mockAPI.price}
+                                            thumbLink={item.thumbLink}
+                                            id = {item.id}
+                                            name = {item.name}
+                                            collection = {item.collection}
+                                            isFavorite = {item.isFavorite} 
+                                            price = {item.price}
                                         ></CardItem>
                                     </Grid>
                                 ))}

@@ -49,7 +49,7 @@ const initialState: initialStateType = {
 };
 
 export const menuCriteriaSlice = createSlice({
-    name: "menuAllNFTsCriteriaSlice",
+    name: "menuCollectionCriteriaSlice",
     initialState,
     reducers: {
         add: (state, action: PayloadAction<CriteriaData>) => {
@@ -84,6 +84,6 @@ export const menuCriteriaSlice = createSlice({
 export const { add, remove, changePrice } = menuCriteriaSlice.actions;
 
 //Selector to access bookList state.
-export const selectState = (state: RootState) => state.menuAllNFTsCriteria;
+export const selectState = (state: RootState) => state.menuCollectionCriteria;
 
 export default menuCriteriaSlice.reducer;

@@ -34,7 +34,7 @@ export default function CardItem(prop: Props) {
                             </p>
                         </Grid>
                     </Grid>
-                    <Grid item md={3}>
+                    <Grid item md={4}>
                         <Grid
                             container
                             direction="column"

@@ -4,6 +4,8 @@ import routes from "../routes";
 import Header from "../features/header/";
 import Footer from "../features/footer";
 
+import {HOME_PATH} from '../routes'
+
 import React from "react";
 
 // import page
@@ -21,8 +23,8 @@ const Routers = () => {
         <React.Suspense fallback={loading}>
             <Header></Header>
             <Routes>
-                <Route path="/home" element={<HomePage />} />
-                <Route index element={<Navigate to="/home" />} />
+                <Route path={HOME_PATH} element={<HomePage />} />
+                <Route index element={<Navigate to={HOME_PATH} />} />
                 {routes.publicRoute.map((route, idx) => {
                     return (
                         route.element && (

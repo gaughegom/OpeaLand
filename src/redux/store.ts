@@ -1,11 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import allNFTsSlice  from '../features/allNFTs/allNFTsSlice';
-import menuCriteriaSlice from "../features/allNFTs/components/menuSide/menuCriteriaSlice"
+import collectionSlice from '../features/collection/collectionSlice'
+import menuAllNFTsCriteriaSlice from "../features/allNFTs/components/menuSide/menuCriteriaSlice"
+import menuCollectionCriteriaSlice from "../features/collection/components/menuSide/menuCriteriaSlice"
 
 export const store = configureStore({
   reducer: {
     allNFTs: allNFTsSlice,
-    menuCriteria: menuCriteriaSlice
+    menuAllNFTsCriteria: menuAllNFTsCriteriaSlice,
+    menuCollectionCriteria: menuCollectionCriteriaSlice,
+    collection: collectionSlice
   },
 });
 

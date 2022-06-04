@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEventHandler } from "react";
 
 import styles from "./cardCollectionStyles.module.scss";
 
@@ -11,11 +11,12 @@ export type Props = {
     author: string;
     description: string;
     id: string;
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
 export default function CardItem(props: Props) {
     return (
-        <div className={styles.box}>
+        <div className={styles.box} onClick={props.onClick}>
             <div
                 className={styles.img}
                 style={{ backgroundImage: "url(" + props.imgUrl + ")" }}

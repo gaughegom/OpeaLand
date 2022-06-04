@@ -10,8 +10,8 @@ const initialState: initialStateType = {
   open: false,
 };
 
-export const allNFTsSlice = createSlice({
-  name: 'allNFTsSlice',
+export const collectionSlice = createSlice({
+  name: 'collection',
   initialState,
   reducers: {
     openHandle: (state, /*action: PayloadAction<initialStateType>*/) => {
@@ -24,9 +24,9 @@ export const allNFTsSlice = createSlice({
 });
 
 // To able to use reducers we need to export them.
-export const { openHandle,closeHandle } = allNFTsSlice.actions;
+export const { openHandle,closeHandle } = collectionSlice.actions;
 
 //Selector to access bookList state.
 export const selectState = (state: RootState) => state.allNFTs;
 
-export default allNFTsSlice.reducer;
+export default collectionSlice.reducer;

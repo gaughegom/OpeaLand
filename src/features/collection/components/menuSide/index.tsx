@@ -17,7 +17,7 @@ export default function MenuSide() {
     const dispatch = useAppDispatch();
 
     const criteriaStatus = useAppSelector(
-        (state) => state.menuAllNFTsCriteria.criteriasList
+        (state) => state.menuCollectionCriteria.criteriasList
     );
 
     const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {

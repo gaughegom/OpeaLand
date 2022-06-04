@@ -1,4 +1,5 @@
 import React from "react";
+import {useNavigate} from "react-router-dom";
 
 import styles from "./collectionsStyles.module.scss";
 
@@ -8,6 +9,7 @@ import Banner from "./components/banner";
 import CardItem from "./components/cardCollection";
 
 import {Props} from '../collections/components/cardCollection'
+import {COLLECTION_PATH} from '../../routes'
 
 const mockAPI: Props = {
     imgUrl: "https://lh3.googleusercontent.com/VdOIczFeM2oMPS0B51ggtw-I72AJK1DZhrV5VL6tH2H26KjeA5KqubyxXUjQhfUHb6laot061LvDkySFQf1-4e_vfTW3VSI7CiVW=h200",
@@ -19,6 +21,9 @@ const mockAPI: Props = {
 }
 
 export default function () {
+
+    const navigate = useNavigate()
+
     return (
         <div>
             <Banner></Banner>
@@ -26,7 +31,7 @@ export default function () {
             <Grid container spacing={4} className = {styles.grid}>
                 {Array.from(Array(20)).map((_, index) => (
                     <Grid item md={4} key={index}>
-                        <CardItem {...mockAPI}></CardItem>
+                        <CardItem {...mockAPI} onClick={() => navigate(`${COLLECTION_PATH}/${mockAPI.id}`)}></CardItem>
                     </Grid>
                 ))}
             </Grid>

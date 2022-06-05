@@ -17,8 +17,8 @@ import {
     LOGIN_PATH
 } from "../../../../routes";
 import { walletConnector } from "../../../wallet/walletConnector";
-import { useAppDispatch } from "../../../../hooks";
-import { setWalletProvider } from "../../../wallet/walletSlice";
+import { useAppDispatch, useAppSelector, useDetectWalletChange } from "../../../../hooks";
+import { setWalletProvider, WalletProvider } from "../../../wallet/walletSlice";
 
 export default function Navigate() {
     const navigate = useNavigate();
@@ -75,11 +75,7 @@ export default function Navigate() {
         dispatch(setWalletProvider(await walletConnector()));
     };
 
-    React.useEffect(() => {
-        window.ethereum.on("accountsChanged", async function () {
-            dispatch(setWalletProvider(await walletConnector()));
-        });
-    }, [dispatch]);
+	useDetectWalletChange();
 
     React.useEffect(() => {
         loadWallet();

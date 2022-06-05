@@ -5,3 +5,5 @@ import { RootState, AppDispatch } from "../redux/store";
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 //useSelector hook with types
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+export { useDetectWalletChange } from "./detectWalletChange";

@@ -8,6 +8,7 @@ import SvgIcon from "@mui/material/SvgIcon";
 import { Grid } from "@mui/material";
 
 import { ethers } from "ethers";
+import SvgEthIcon from "../../../svg/svgEthIcon";
 
 
 type Props = {
@@ -47,14 +48,12 @@ export default function CardItem(prop: Props) {
                         >
                             <p style={{ fontSize: 14 }}>Price</p>
                             <div style={{ fontWeight: 600 }}>
+                                <span>
+                                    <SvgEthIcon style={{marginRight: '8px', width:"16",  height:"16"}}/>
+                                </span>
                                 {ethers.utils.formatEther(prop.price)}
-                                <span
-                                    style={{
-                                        fontSize: 14,
-                                        fontWeight: "normal",
-                                    }}
-                                > ETH</span> 
                             </div>
+                            
                         </Grid>
                     </Grid>
                 </Grid>

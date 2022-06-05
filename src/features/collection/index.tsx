@@ -138,7 +138,7 @@ export default function Collection() {
                                             name={item.name}
                                             collection={item.collection}
                                             isFavorite={item.isFavorite}
-                                            price={item.price}
+                                            price={item.price.toString()}
                                         ></CardItem>
                                     </Grid>
                                 ))}

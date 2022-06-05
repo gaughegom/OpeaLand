@@ -12,6 +12,7 @@ export const COLLECTION_PATH = "/collection";
 export const HOME_PATH = "/home";
 export const ITEM_PATH = "/item";
 export const PROFILE_PATH = '/profile'
+export const LOGIN_PATH = '/login'
 
 type routeType = {
     path: string;

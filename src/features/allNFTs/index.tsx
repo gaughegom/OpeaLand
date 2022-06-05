@@ -12,17 +12,20 @@ import CardItem from "./components/cardItem";
 import Criteria from "./components/criteria";
 
 import { useAppSelector } from "../../hooks";
-import {ALL_ITEMS} from '../../services/APIurls'
+import { ALL_ITEMS } from "../../services/APIurls";
+import { IItemModel, IItemMetadataModel } from "../../../model/Item.model";
 
-type itemType = {
-    thumbLink: string,
-    id: string,
-    collection: string, 
-    name: string, 
-    author: string,
-    isFavorite: boolean,
-    price: number,
-}
+import { http } from "../../services/AxiosHelper";
+
+export type itemType = {
+    thumbLink: string;
+    id: string;
+    collection: string;
+    name: string;
+    author: string;
+    isFavorite: boolean;
+    price: string;
+};
 
 export default function AllNFTsPage() {
     const open = useAppSelector((state) => state.allNFTs.open);
@@ -31,23 +34,34 @@ export default function AllNFTsPage() {
     );
 
     //api
-    const [items, setItem] = useState<itemType[]>([])
+    const [items, setItem] = useState<itemType[]>([]);
 
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         const newItems:itemType[]  = await (await axios.get(ALL_ITEMS)).data
+    //         console.log(newItems)
+    //         setItem(newItems)
+    //     };
+
+    //     fetchData()
+    // },[])
+    //-- real data
+    const [apiItems, setApiItems] = useState<IItemModel[]>([])
     useEffect(() => {
         const fetchData = async () => {
-            const newItems:itemType[]  = await (await axios.get(ALL_ITEMS)).data
-            console.log(newItems)
-            setItem(newItems)
+            const newItems: IItemModel[] = (
+                await http.get<IItemModel[]>(ALL_ITEMS)
+            ).data;
+            console.log(newItems);
+            setApiItems(newItems)
         };
 
-        fetchData()
-    },[])
+        fetchData();
+    }, []);
     //----
-
 
     return (
         <React.Fragment>
-
             <FilterHeader />
 
             <Grid container direction="row" className={styles.grid}>
@@ -66,18 +80,23 @@ export default function AllNFTsPage() {
                                 columnSpacing={2}
                                 className={styles.boxItem}
                             >
-                                {items.map((item) => (
-                                    <Grid item md={open ? 4 : 3} key={item.id}>
-                                        <CardItem
-                                            thumbLink={item.thumbLink}
-                                            id = {item.id}
-                                            name = {item.name}
-                                            collection = {item.collection}
-                                            isFavorite = {item.isFavorite} 
-                                            price = {item.price}
-                                        ></CardItem>
-                                    </Grid>
-                                ))}
+                                {apiItems !== [] &&
+                                    apiItems.map((item) => (
+                                        <Grid
+                                            item
+                                            md={open ? 4 : 3}
+                                            key={item.token + item.tokenId}
+                                        >
+                                            <CardItem
+                                                thumbLink={item.thumbLink}
+                                                id={item.token + item.tokenId}
+                                                name={item.name}
+                                                collection={item.collectionName}
+                                                //isFavorite={item.isFavorite}
+                                                price={item.price}
+                                            ></CardItem>
+                                        </Grid>
+                                    ))}
                             </Grid>
                         </Grid>
                     </Grid>

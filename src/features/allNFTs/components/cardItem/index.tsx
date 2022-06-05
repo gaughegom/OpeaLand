@@ -4,15 +4,19 @@ import styles from "./cardItemStyles.module.scss";
 
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import SvgIcon from "@mui/material/SvgIcon";
 import { Grid } from "@mui/material";
+
+import { ethers } from "ethers";
+
 
 type Props = {
     thumbLink: string;
     id: string;
     collection: string;
     name: string;
-    price: number;
-    isFavorite: boolean;
+    price: string;
+    isFavorite?: boolean;
 };
 
 export default function CardItem(prop: Props) {
@@ -42,31 +46,28 @@ export default function CardItem(prop: Props) {
                             style={{ textAlign: "right" }}
                         >
                             <p style={{ fontSize: 14 }}>Price</p>
-                            <p style={{ fontWeight: 600 }}>
-                                {prop.price}
+                            <div style={{ fontWeight: 600 }}>
+                                {ethers.utils.formatEther(prop.price)}
                                 <span
                                     style={{
                                         fontSize: 14,
                                         fontWeight: "normal",
                                     }}
-                                >
-                                    {" "}
-                                    Eth
-                                </span>
-                            </p>
+                                > ETH</span> 
+                            </div>
                         </Grid>
                     </Grid>
                 </Grid>
             </div>
             <div className={styles.action}>
                 <div className={styles.button}>Buy now</div>
-                <div className={styles.icon}>
+                {/* <div className={styles.icon}>
                     {prop.isFavorite ? (
                         <FavoriteIcon sx={{ fontSize: 24 }} />
                     ) : (
                         <FavoriteBorderIcon sx={{ fontSize: 24 }} />
                     )}
-                </div>
+                </div> */}
             </div>
         </div>
     );

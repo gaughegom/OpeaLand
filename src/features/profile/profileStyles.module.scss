@@ -9,7 +9,7 @@
         object-fit: cover;
         width: 100%;
         height: 100%;
-        &:hover {
+        .hover {
             cursor: pointer;
             .layout {
                 display: block;
@@ -54,7 +54,7 @@
         background-color: rgb(219, 219, 219);
         overflow: hidden;
 
-        &:hover {
+        .hover {
             cursor: pointer;
             .layout {
                 display: block;
@@ -87,7 +87,6 @@
 .grid {
     padding: 80px 40px;
     width: 100%;
-    height: 400px;
     .info {
         padding: 20px 0;
         display: flex;
@@ -117,9 +116,9 @@
         }
     }
     .tabs {
-        display : flex;
+        display: flex;
         flex-direction: column;
-        gap:20px;
+        gap: 20px;
         .indicators {
             width: 100%;
             height: 50px;
@@ -148,7 +147,189 @@
             }
         }
         .container {
+            width: 100%;
+        }
+        .profileSetting {
+            display: flex;
+            flex-direction: row;
+            gap: 80px;
+            justify-content: center;
+            .left {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+                .form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 24px;
+                    width: 400px;
+                    .field {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        .label {
+                            font-weight: 600;
+                        }
+                        .input {
+                            width: 100%;
+                            padding: 12px;
+                            border-radius: 12px;
+                            border: 1px solid rgb(229 232 235);
+                            font-size: 14px;
+                            resize: vertical;
+                            &_invalid {
+                                @extend .input;
+                                border: 2px solid red;
+                            }
+                        }
+                        .helperText {
+                            font-size: 14px;
+                            color: red;
+                        }
+                    }
+                }
+                .save {
+                    padding: 12px 40px;
+                    color: white;
+                    width: fit-content;
+                    font-weight: 600;
+                    background-color: var(--primaryColor);
+                    border-radius: 12px;
+                    &:hover {
+                        cursor: pointer;
+                        opacity: 0.9;
+                    }
+                    &_disable {
+                        @extend .save;
+                        background-color: #868686;
+                    }
+                }
+            }
+            .right {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+                .form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 24px;
+                    .field {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        .label {
+                            font-weight: 600;
+                        }
+                        .avt {
+                            position: relative;
+                            width: 160px;
+                            height: 160px;
+                            border-radius: 50%;
+                            overflow: hidden;
+                            background-size: cover;
+                            object-fit: cover;
+                            background-position: center;
+                            background-color: rgb(219, 219, 219);
 
+                            &:hover {
+                                cursor: pointer;
+                                .layout {
+                                    display: block;
+                                }
+                                .editIcon {
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                }
+                            }
+                            .layout {
+                                display: none;
+                                width: 100%;
+                                height: 100%;
+                                background-color: black;
+                                opacity: 0.1;
+                            }
+                            .editIcon {
+                                display: none;
+                                width: 40px;
+                                height: 40px;
+
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                            }
+                            .loadFile {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                opacity: 0;
+                            }
+                        }
+                        .banner {
+                            position: relative;
+                            width: 160px;
+                            height: 100px;
+                            border-radius: 12px;
+                            background-color: rgb(219, 219, 219);
+                            overflow: hidden;
+                            background-size: cover;
+                            object-fit: cover;
+                            background-position: center;
+                            &:hover {
+                                cursor: pointer;
+                                .layout {
+                                    display: block;
+                                }
+                                .editIcon {
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                }
+                            }
+                            .layout {
+                                display: none;
+                                width: 100%;
+                                height: 100%;
+                                background-color: black;
+                                opacity: 0.1;
+                            }
+                            .editIcon {
+                                display: none;
+                                width: 40px;
+                                height: 40px;
+
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                            }
+                            .loadFile {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                opacity: 0;
+                            }
+                        }
+                    }
+                }
+                .remove {
+                    padding: 12px 40px;
+                    color: white;
+                    width: fit-content;
+                    font-weight: 600;
+                    background-color: var(--primaryColor);
+                    border-radius: 12px;
+                    &:hover {
+                        cursor: pointer;
+                        opacity: 0.9;
+                    }
+                }
+            }
         }
     }
 }
@@ -157,4 +338,23 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+.notification {
+    z-index: 5;
+    position: fixed;
+    bottom: 60px;
+    right: 60px;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    background-color: rgb(10, 2, 44);
+    color: white;
+    overflow: hidden;
+    .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }

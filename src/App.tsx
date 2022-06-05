@@ -4,9 +4,6 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import Routers from "./routers";
 
-import Header from './features/header'
-import Footer from './features/footer'
-
 const theme = createTheme({
     typography: {
         fontFamily: ["Poppins", "cursive"].join(","),

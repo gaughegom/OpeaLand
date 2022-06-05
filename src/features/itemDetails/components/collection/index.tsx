@@ -18,7 +18,7 @@ type itemType = {
     name: string;
     author: string;
     isFavorite: boolean;
-    price: number;
+    price: string;
 };
 
 export default function Collection() {

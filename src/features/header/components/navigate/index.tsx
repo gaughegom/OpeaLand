@@ -5,14 +5,20 @@ import styles from "./navigateStyles.module.scss";
 
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+// import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+// import GridOnIcon from "@mui/icons-material/GridOn";
 import PersonIcon from "@mui/icons-material/Person";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import GridOnIcon from "@mui/icons-material/GridOn";
+import LogoutIcon from '@mui/icons-material/Logout';
 
-import {ALL_NFTS_PATH, ALL_COLLECTIONS_PATH, PROFILE_PATH} from '../../../../routes'
+import {
+    ALL_NFTS_PATH,
+    ALL_COLLECTIONS_PATH,
+    PROFILE_PATH,
+    LOGIN_PATH
+} from "../../../../routes";
 import { walletConnector } from "../../../wallet/walletConnector";
-import { useAppDispatch, useAppSelector } from "../../../../hooks";
-import { setWalletProvider, WalletProvider } from "../../../wallet/walletSlice";
+import { useAppDispatch } from "../../../../hooks";
+import { setWalletProvider } from "../../../wallet/walletSlice";
 
 export default function Navigate() {
     const navigate = useNavigate();
@@ -31,10 +37,10 @@ export default function Navigate() {
             path: ALL_COLLECTIONS_PATH,
         },
     ];
-    const statsItem = [
-        { title: "Rankings", path: "" },
-        { title: "Activities", path: "" },
-    ];
+    // const statsItem = [
+    //     { title: "Rankings", path: "" },
+    //     { title: "Activities", path: "" },
+    // ];
 
     const userItem = [
         {
@@ -42,43 +48,46 @@ export default function Navigate() {
             title: "Profile",
             path: PROFILE_PATH,
         },
+        // {
+        //     iconLink: <FavoriteBorderIcon sx={{ fontSize: 24 }} />,
+        //     title: "Favories",
+        //     path: ''
+        // },
+        // {
+        //     iconLink: <GridOnIcon sx={{ fontSize: 24 }} />,
+        //     title: "My Collections",
+        //     path: ''
+        // },
         {
-            iconLink: <FavoriteBorderIcon sx={{ fontSize: 24 }} />,
-            title: "Favories",
-            path: ''
-        },
-        {
-            iconLink: <GridOnIcon sx={{ fontSize: 24 }} />,
-            title: "My Collections",
-            path: ''
+            iconLink: <LogoutIcon sx={{ fontSize: 24 }} />,
+            title: "Log Out",
+            path: LOGIN_PATH
         },
     ];
-  const walletItem = [{ iconLink: "", title: "" }];
+    //   const walletItem = [{ iconLink: "", title: "" }];
 
-  const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch();
 
-  // const [wallet, setWallet] = React.useState<WalletProvider>();
-  const [isLoadWallet, setIsLoadWallet] = React.useState(false);
-  
-  const loadWallet = async () => {
-    dispatch(setWalletProvider(await walletConnector()));
-  }
+    // const [wallet, setWallet] = React.useState<WalletProvider>();
+    const [isLoadWallet, setIsLoadWallet] = React.useState(false);
 
-  React.useEffect(() => {
-    window.ethereum.on('accountsChanged', async function () {
-      dispatch(setWalletProvider(await walletConnector()));
-    })
-  }, [dispatch])
+    const loadWallet = async () => {
+        dispatch(setWalletProvider(await walletConnector()));
+    };
 
-  
-  React.useEffect(() => {
-    loadWallet();
-  }, [isLoadWallet])
+    React.useEffect(() => {
+        window.ethereum.on("accountsChanged", async function () {
+            dispatch(setWalletProvider(await walletConnector()));
+        });
+    }, [dispatch]);
 
+    React.useEffect(() => {
+        loadWallet();
+    }, [isLoadWallet]);
 
-  const handleClickConnect = () => {
-    setIsLoadWallet(!isLoadWallet);
-  }
+    const handleClickConnect = () => {
+        setIsLoadWallet(!isLoadWallet);
+    };
 
     return (
         <div className={styles.navigate}>
@@ -86,7 +95,11 @@ export default function Navigate() {
                 <p>Explore</p>
                 <div className={styles["dropDownContent--left"]}>
                     {exploreItem.map((item, key) => (
-                        <div onClick={() => navigate(item.path)} key={key} className={styles.dropDownItem}>
+                        <div
+                            onClick={() => navigate(item.path)}
+                            key={key}
+                            className={styles.dropDownItem}
+                        >
                             <div
                                 className={styles.icon}
                                 style={{

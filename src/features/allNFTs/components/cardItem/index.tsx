@@ -55,9 +55,9 @@ export default function CardItem(prop: Props) {
                             style={{ textAlign: "right" }}
                         >
                             <p style={{ fontSize: 14 }}>Price</p>
-                            <div style={{ fontWeight: 600 }}>
+                            <div>
                                 <span>
-                                    <SvgEthIcon style={{marginRight: '8px', width:"16",  height:"16"}}/>
+                                    <SvgEthIcon  style={{marginRight: '8px', width:"16px",  height:"16px"}}/>
                                 </span>
                                 {ethers.utils.formatEther(prop.price)}
                             </div>

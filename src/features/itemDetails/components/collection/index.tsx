@@ -10,24 +10,15 @@ import Divider from "@mui/material/Divider";
 import CardItem from "../../../allNFTs/components/cardItem"
 
 import { ALL_ITEMS } from "../../../../services/APIurls";
-
-type itemType = {
-    thumbLink: string;
-    id: string;
-    collection: string;
-    name: string;
-    author: string;
-    isFavorite: boolean;
-    price: string;
-};
+import {IItemModel} from "../../../../../model/Item.model"
 
 export default function Collection() {
     //api
-    const [items, setItem] = useState<itemType[]>([]);
+    const [items, setItem] = useState<IItemModel[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
-            const newItems: itemType[] = await (
+            const newItems: IItemModel[] = await (
                 await axios.get(ALL_ITEMS)
             ).data;
             setItem(newItems);
@@ -48,14 +39,14 @@ export default function Collection() {
 
             <div className={styles.container}>
                 <div className={styles.items}>
-                    {items.map((item) => (
-                        <div key = {item.id} className={styles.item}>
+                    {items.map((item,idx) => (
+                        <div key = {idx} className={styles.item}>
                             <CardItem
                                 thumbLink={item.thumbLink}
-                                id={item.id}
+                                token = {item.token}
+                                tokenId = {item.tokenId}
                                 name={item.name}
-                                collection={item.collection}
-                                isFavorite={item.isFavorite}
+                                collection={item.collectionName}
                                 price={item.price}
                             ></CardItem>
                         </div>

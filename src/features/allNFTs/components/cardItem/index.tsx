@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import styles from "./cardItemStyles.module.scss";
 
@@ -9,10 +10,10 @@ import { Grid } from "@mui/material";
 
 import { ethers } from "ethers";
 
-
 type Props = {
     thumbLink: string;
-    id: string;
+    token: string;
+    tokenId: string;
     collection: string;
     name: string;
     price: string;
@@ -20,8 +21,15 @@ type Props = {
 };
 
 export default function CardItem(prop: Props) {
+    const navigate = useNavigate();
+
     return (
-        <div className={styles.box}>
+        <div
+            className={styles.box}
+            onClick={() => {
+                navigate(`/collection/${prop.token}/item/${prop.tokenId}`);
+            }}
+        >
             <div
                 className={styles.img}
                 style={{ backgroundImage: `url(${prop.thumbLink})` }}
@@ -53,7 +61,10 @@ export default function CardItem(prop: Props) {
                                         fontSize: 14,
                                         fontWeight: "normal",
                                     }}
-                                > ETH</span> 
+                                >
+                                    {" "}
+                                    ETH
+                                </span>
                             </div>
                         </Grid>
                     </Grid>

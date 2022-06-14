@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import styles from "./itemDetailsStyles.module.scss";
 
@@ -10,6 +11,13 @@ import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
 
 import Collection from "./components/collection";
 
+import { IItemModel, IItemMetadataModel } from "../../../model/Item.model";
+import { http } from "../../services/AxiosHelper";
+import { ALL_ITEMS } from "../../services/APIurls";
+import formatAddress from "../../utils/formatAddress";
+import { ethers } from "ethers";
+
+
 const mockAPI = {
     thumbLink:
         "https://lh3.googleusercontent.com/hUJ0MXZxg0KAPc_59PllzGK2hZ68QjkfaRdHNwLSTHMtqlEhn3QJpEv71FVgpRZweMvCQFDP4uyDpMAx0Mg4_4kr6ux-20WmXlfFYQ=w600",
@@ -19,9 +27,10 @@ const mockAPI = {
     author: "Ghost-Maker",
     isFavorite: true,
     price: 0.008,
-    status: 'bid',
+    status: "bid",
     saleEnd: "6/3/2022",
-    description: "Using your past experiences, evolve to become the best version of yourself in the present, taking each moment in time as a gift.",
+    description:
+        "Using your past experiences, evolve to become the best version of yourself in the present, taking each moment in time as a gift.",
     detail: {
         contractAddress: "0x5bd8dff9",
         tokenID: "1",
@@ -72,22 +81,49 @@ const mockAPI = {
 };
 
 export default function Item() {
+    const params = useParams();
+    const [item, setItem] = useState<IItemModel>();
+    useEffect(() => {
+        const fetchData = async () => {
+            const newItem: IItemModel = (
+                await http.get<IItemModel[]>(
+                    ALL_ITEMS +
+                        `?token=${params.token}&tokenId=${params.tokenId}`
+                )
+            ).data[0];
+
+            if (newItem) {
+                const newMetaData: IItemMetadataModel = (
+                    await http.get<IItemMetadataModel>(newItem.ipfsUrl!)
+                ).data;
+                newItem.metadata = newMetaData;
+            }
+            setItem(newItem);
+        };
+
+        fetchData();
+    }, [params]);
+
     return (
         <div className={styles.page}>
             <div className={styles.grid}>
                 <div className={styles.left}>
                     <div
                         className={styles.img}
-                        style={{ backgroundImage: `url(${mockAPI.thumbLink})` }}
+                        style={{ backgroundImage: `url(${item?.thumbLink})` }}
                     ></div>
                     <div className={styles.info}>
                         <div className={styles.description}>
                             <div className={styles.title}>
-                                <FormatAlignJustifyIcon sx={{ fontSize: 24 }}></FormatAlignJustifyIcon>
+                                <FormatAlignJustifyIcon
+                                    sx={{ fontSize: 24 }}
+                                ></FormatAlignJustifyIcon>
                                 <div>Description</div>
                             </div>
                             <Divider></Divider>
-                            <div className = {styles.content}>{mockAPI.description}</div>
+                            <div className={styles.content}>
+                                {item?.metadata.description}
+                            </div>
                         </div>
 
                         <Divider></Divider>
@@ -98,10 +134,15 @@ export default function Item() {
                                 <div>Details</div>
                             </div>
                             <Divider></Divider>
-                            <div className = {styles.content}>
-                                <div className={styles.row}><div>Contact address</div><div>{mockAPI.detail.contractAddress}</div></div>
-                                <div className={styles.row}><div>Token ID</div><div>{mockAPI.detail.tokenID}</div></div>
-                                <div className={styles.row}><div>Creator fees</div><div>{mockAPI.detail.creatorFees}</div></div>
+                            <div className={styles.content}>
+                                <div className={styles.row}>
+                                    <div>Contact address</div>
+                                    <div>{formatAddress(item?.token)}</div>
+                                </div>
+                                <div className={styles.row}>
+                                    <div>Token ID</div>
+                                    <div>{formatAddress(item?.tokenId)}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -110,21 +151,25 @@ export default function Item() {
                 {/* right */}
                 <div className={styles.right}>
                     <div className={styles["collection-name"]}>
-                        {mockAPI.collection}
+                        {item?.collectionName}
                     </div>
-                    <div className={styles["name"]}>{mockAPI.name}</div>
+                    <div className={styles["name"]}>{item?.name}</div>
                     <p className={styles["author"]}>
                         Owned by{" "}
-                        <span style={{ color: "var(--primaryColor)" }}>
-                            {mockAPI.author}
+                        <span style={{ color: "var(--primaryColor)" }} className = {styles.link}>
+                            {!item?.ownerDisplay ? formatAddress(item?.owner) : item?.ownerDisplay}
                         </span>
                     </p>
 
                     <div className={styles["box-buynow"]}>
-                        <div className={styles.saleEnd}>
-                            Sale end at {mockAPI.saleEnd}
-                        </div>
-                        <Divider></Divider>
+                        {item?.status !== "null" && (
+                            <React.Fragment>
+                                <div className={styles.saleEnd}>
+                                    Sale end at {item?.endAt.toString()}
+                                </div>
+                                <Divider></Divider>
+                            </React.Fragment>
+                        )}
                         <div className={styles.buttonArea}>
                             <div className={styles.price}>
                                 <div
@@ -133,16 +178,22 @@ export default function Item() {
                                         fontWeight: "normal",
                                     }}
                                 >
-                                    {(mockAPI.status === 'sale') ?"Current price" : "Minimum bid"}
+                                    {item?.status === "sell"
+                                        ? "Current price"
+                                        : "Minimum bid"}
                                 </div>
-                                <div>{mockAPI.price} Eth</div>
+                                <div>{item && ethers.utils.formatEther(item.price)} Eth</div>
                             </div>
 
                             <div className={styles.button}>
                                 <AccountBalanceWalletIcon
                                     sx={{ fontSize: 28 }}
                                 ></AccountBalanceWalletIcon>
-                                <div>{(mockAPI.status === 'sale') ?"Buy now" : "Place bid"}</div>
+                                <div>
+                                    {mockAPI.status === "sale"
+                                        ? "Buy now"
+                                        : "Place bid"}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -20,48 +20,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 import CardItemCollection from "../collections/components/cardCollection";
 
-import { Props } from "../collections/components/cardCollection";
 import { COLLECTION_PATH } from "../../routes";
 import { validateEmail, validateUserName } from "./helper";
 
-const mockAPI: Props[] = [
-    {
-        imgUrl: "https://lh3.googleusercontent.com/VdOIczFeM2oMPS0B51ggtw-I72AJK1DZhrV5VL6tH2H26KjeA5KqubyxXUjQhfUHb6laot061LvDkySFQf1-4e_vfTW3VSI7CiVW=h200",
-        avtUrl: "https://lh3.googleusercontent.com/ufumJQN9NwT0U5jh_suJP5cLRIjyE38hirVdBChQLe-ghnt1RomIARfxSNmR6fdMQC0OIgjVQHhhduUfcxiRVrfHpihrXSW-SU5J=s100",
-        collectionName: "The Doggies (Snoop Dogg)",
-        author: "TheSandboxGame",
-        description:
-            "10,000 metaverse-ready Avatars, playable in The Sandbox. Each Doggy has been generated from over 150+ traits, curated by Snoop Dogg himself. Owning a Doggy provides access to a playable The Sandbox avatar, as well as access to future features inside the metaverse.",
-        id: "gad",
-    },
-    {
-        imgUrl: "https://lh3.googleusercontent.com/VdOIczFeM2oMPS0B51ggtw-I72AJK1DZhrV5VL6tH2H26KjeA5KqubyxXUjQhfUHb6laot061LvDkySFQf1-4e_vfTW3VSI7CiVW=h200",
-        avtUrl: "https://lh3.googleusercontent.com/ufumJQN9NwT0U5jh_suJP5cLRIjyE38hirVdBChQLe-ghnt1RomIARfxSNmR6fdMQC0OIgjVQHhhduUfcxiRVrfHpihrXSW-SU5J=s100",
-        collectionName: "The Doggies (Snoop Dogg)",
-        author: "TheSandboxGame",
-        description:
-            "10,000 metaverse-ready Avatars, playable in The Sandbox. Each Doggy has been generated from over 150+ traits, curated by Snoop Dogg himself. Owning a Doggy provides access to a playable The Sandbox avatar, as well as access to future features inside the metaverse.",
-        id: "gad",
-    },
-    {
-        imgUrl: "https://lh3.googleusercontent.com/VdOIczFeM2oMPS0B51ggtw-I72AJK1DZhrV5VL6tH2H26KjeA5KqubyxXUjQhfUHb6laot061LvDkySFQf1-4e_vfTW3VSI7CiVW=h200",
-        avtUrl: "https://lh3.googleusercontent.com/ufumJQN9NwT0U5jh_suJP5cLRIjyE38hirVdBChQLe-ghnt1RomIARfxSNmR6fdMQC0OIgjVQHhhduUfcxiRVrfHpihrXSW-SU5J=s100",
-        collectionName: "The Doggies (Snoop Dogg)",
-        author: "TheSandboxGame",
-        description:
-            "10,000 metaverse-ready Avatars, playable in The Sandbox. Each Doggy has been generated from over 150+ traits, curated by Snoop Dogg himself. Owning a Doggy provides access to a playable The Sandbox avatar, as well as access to future features inside the metaverse.",
-        id: "gad",
-    },
-    {
-        imgUrl: "https://lh3.googleusercontent.com/VdOIczFeM2oMPS0B51ggtw-I72AJK1DZhrV5VL6tH2H26KjeA5KqubyxXUjQhfUHb6laot061LvDkySFQf1-4e_vfTW3VSI7CiVW=h200",
-        avtUrl: "https://lh3.googleusercontent.com/ufumJQN9NwT0U5jh_suJP5cLRIjyE38hirVdBChQLe-ghnt1RomIARfxSNmR6fdMQC0OIgjVQHhhduUfcxiRVrfHpihrXSW-SU5J=s100",
-        collectionName: "The Doggies (Snoop Dogg)",
-        author: "TheSandboxGame",
-        description:
-            "10,000 metaverse-ready Avatars, playable in The Sandbox. Each Doggy has been generated from over 150+ traits, curated by Snoop Dogg himself. Owning a Doggy provides access to a playable The Sandbox avatar, as well as access to future features inside the metaverse.",
-        id: "gad",
-    },
-];
+import {IItemModel} from '../../../model/Item.model'
+
 
 const user = {
     name: "John",
@@ -99,18 +62,18 @@ export default function Profile() {
             <div>No item to display</div>
         </div>
     );
-    const [items, setItem] = useState<itemType[]>([]);
+    const [items, setItem] = useState<IItemModel[]>([]);
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const newItems: itemType[] = await (
-    //             await axios.get(ALL_ITEMS)
-    //         ).data;
-    //         setItem(newItems);
-    //     };
+    useEffect(() => {
+        const fetchData = async () => {
+            const newItems: IItemModel[] = await (
+                await axios.get(ALL_ITEMS)
+            ).data;
+            setItem(newItems);
+        };
 
-    //     fetchData();
-    // }, []);
+        fetchData();
+    }, []);
     const navigate = useNavigate();
     //------
     //valid form
@@ -277,19 +240,17 @@ export default function Profile() {
                                             columnSpacing={2}
                                             className={styles.boxItem}
                                         >
-                                            {items.map((item) => (
-                                                <Grid item md={3} key={item.id}>
+                                            {items.map((item,idx) => (
+                                                <Grid item md={3} key={idx}>
                                                     <CardItem
                                                         thumbLink={
                                                             item.thumbLink
                                                         }
-                                                        id={item.id}
+                                                        token={item.token}
+                                                        tokenId={item.tokenId}
                                                         name={item.name}
                                                         collection={
-                                                            item.collection
-                                                        }
-                                                        isFavorite={
-                                                            item.isFavorite
+                                                            item.collectionName
                                                         }
                                                         price={item.price}
                                                     ></CardItem>
@@ -303,7 +264,7 @@ export default function Profile() {
                             </div>
                         )}
 
-                        {currentIndicator === 2 && (
+                        {/* {currentIndicator === 2 && (
                             <div>
                                 {mockAPI !== [] ? (
                                     <Grid
@@ -328,7 +289,7 @@ export default function Profile() {
                                     noItem
                                 )}
                             </div>
-                        )}
+                        )} */}
 
                         {currentIndicator === 3 && (
                             <div className={styles.profileSetting}>

@@ -18,13 +18,6 @@ const initialState: initialStateType = {
             checked: false,
         },
         {
-            title: "New",
-            value: "New",
-            criteria: "status",
-            key: "New",
-            checked: false,
-        },
-        {
             title: "On Auction",
             value: "On Auction",
             criteria: "status",

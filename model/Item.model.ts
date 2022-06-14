@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-
 export interface IItemMetadataModel {
     imageUrl: string,
     description: string,
@@ -14,14 +12,16 @@ export interface IItemModel {
     thumbLink: string,
     name: string,
     token: string,// collection address
-    tokenId: string,
+    tokenId: string, // item id in collection
     collectionName: string
     price: string,
     creator?: string,
-    owner: string,
-    ipfsUrl?: string,
+    owner: string, // seller
+    ownerDisplay: string,
+    ipfsUrl: string,
     metadata: IItemMetadataModel,
     status: string,
+    endAt: string,
 }
 
 

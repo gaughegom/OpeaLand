@@ -33,18 +33,6 @@ export default function AllNFTsPage() {
         (state) => state.menuAllNFTsCriteria.criteriasList
     );
 
-    //api
-    const [items, setItem] = useState<itemType[]>([]);
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const newItems:itemType[]  = await (await axios.get(ALL_ITEMS)).data
-    //         console.log(newItems)
-    //         setItem(newItems)
-    //     };
-
-    //     fetchData()
-    // },[])
     //-- real data
     const [apiItems, setApiItems] = useState<IItemModel[]>([])
     useEffect(() => {
@@ -52,7 +40,6 @@ export default function AllNFTsPage() {
             const newItems: IItemModel[] = (
                 await http.get<IItemModel[]>(ALL_ITEMS)
             ).data;
-            console.log(newItems);
             setApiItems(newItems)
         };
 
@@ -89,7 +76,8 @@ export default function AllNFTsPage() {
                                         >
                                             <CardItem
                                                 thumbLink={item.thumbLink}
-                                                id={item.token + item.tokenId}
+                                                tokenId={item.tokenId}
+                                                token={item.token}
                                                 name={item.name}
                                                 collection={item.collectionName}
                                                 //isFavorite={item.isFavorite}

@@ -21,7 +21,7 @@
 
                 background-size: cover;
                 object-fit: cover;
-
+                background-position: center;
                 border-radius: 12px;
             }
             .info {
@@ -86,6 +86,12 @@
                 color: rgb(112 122 131);
                 font-size: 18px;
                 margin: 0px;
+                .link {
+                    &:hover {
+                        opacity: 0.9;
+                        cursor: pointer;
+                    }
+                }
             }
             .box-buynow {
                 width: 100%;

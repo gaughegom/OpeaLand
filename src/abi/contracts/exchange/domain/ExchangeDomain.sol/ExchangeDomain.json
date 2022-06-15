@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ExchangeDomain",
+  "sourceName": "contracts/exchange/domain/ExchangeDomain.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212203a2fd42b065c9c03bce963acce5ef148e256c9862016f092b0d9cd9d9a04685564736f6c63430008050033",
+  "deployedBytecode": "0x6080604052600080fdfea26469706673582212203a2fd42b065c9c03bce963acce5ef148e256c9862016f092b0d9cd9d9a04685564736f6c63430008050033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

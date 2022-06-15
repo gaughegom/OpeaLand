@@ -18,7 +18,7 @@ import { sliceString } from "../../utils/strimString";
 
 // contract import
 import { contractAddresses } from '../../config'
-import ERC721Default from '../../artifacts/contracts/token/ERC721Default.sol/ERC721Default.json'
+import ERC721Default from '../../abi/contracts/token/ERC721Default.sol/ERC721Default.json'
 
 function RequestSymbol() {
     return <span className={styles.require}>*</span>;

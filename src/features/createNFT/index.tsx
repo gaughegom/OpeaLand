@@ -16,6 +16,10 @@ import { pushNotify, removeNotify } from "../../components/Notify/notifySlice";
 
 import { sliceString } from "../../utils/strimString";
 
+// contract import
+import { contractAddresses } from '../../config'
+import ERC721Default from '../../artifacts/contracts/token/ERC721Default.sol/ERC721Default.json'
+
 function RequestSymbol() {
     return <span className={styles.require}>*</span>;
 }
@@ -56,6 +60,8 @@ export default function CreateNFT() {
                 dispatch(removeNotify(notify));
             }, 10000);
         }
+      console.log(contractAddresses.erc721Default);
+      console.log(ERC721Default.abi)
     }, [nameInput, selectedAvt, createResult]);
 
     const onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {

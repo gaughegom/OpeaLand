@@ -13,7 +13,7 @@ import Criteria from "./components/criteria";
 
 import { useAppSelector } from "../../hooks";
 import { ALL_ITEMS } from "../../services/APIurls";
-import { IItemModel, IItemMetadataModel } from "../../../model/Item.model";
+import { IItemModel, IItemMetadataModel } from "../../model/Item.model";
 
 import { http } from "../../services/AxiosHelper";
 

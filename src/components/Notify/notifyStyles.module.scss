@@ -1,0 +1,53 @@
+.stack{
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+
+    .box {
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 0 12px 4px #b9bec0;
+        width: fit-content;
+        height: 48px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .indicator {
+            width: 4px;
+            height: 100%;
+            &__success {
+                @extend .indicator;
+                background-color: rgb(8, 109, 8);
+            }
+            &__error {
+                @extend .indicator;
+                background-color: rgb(160, 11, 11);
+            }
+        }
+        .container {
+            display: inline-block;
+            padding: 12px;
+            background-color: rgb(40, 5, 44);
+            color: white;
+            height: 100%;
+        }
+        .icon {
+            padding: 12px;
+            background-color: rgb(40, 5, 44);
+            display: flex;
+            align-items: center;
+            justify-self: center;
+            color: white;
+            height: 100%;
+        }
+        &:hover {
+            opacity: 0.9;
+            cursor: pointer;
+        }
+    }
+}

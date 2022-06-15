@@ -14,7 +14,8 @@ import {
     ALL_NFTS_PATH,
     ALL_COLLECTIONS_PATH,
     PROFILE_PATH,
-    LOGIN_PATH
+    LOGIN_PATH,
+    CREATE_NFT_PATH
 } from "../../../../routes";
 import { walletConnector } from "../../../wallet/walletConnector";
 import { useAppDispatch, useAppSelector, useDetectWalletChange } from "../../../../hooks";
@@ -119,7 +120,7 @@ export default function Navigate() {
                 </div>
             </div> */}
 
-            <div className={styles.item}>
+            <div className={styles.item} onClick={() => navigate(CREATE_NFT_PATH)}>
                 <p>Create</p>
             </div>
 

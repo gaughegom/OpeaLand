@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import styles from "./bannerStyles.module.scss";
 
 import Grid from "@mui/material/Grid";
 
 import HotCollection from "./components/hotCollection";
+
+import { CREATE_NFT_PATH, ALL_NFTS_PATH } from "../../../../routes";
 
 type Props = {
     imgUrl: string;
@@ -16,6 +19,8 @@ type Props = {
 };
 
 export default function Banner({ imgUrl, description }: Props) {
+    const navigate = useNavigate();
+
     return (
         <div className={styles.box}>
             <div
@@ -36,8 +41,18 @@ export default function Banner({ imgUrl, description }: Props) {
                         OpenSea is the world's first and largest NFT marketplace
                     </p>
                     <div className={styles.buttonArea}>
-                        <button className={styles.exploreButton}>Explore</button>
-                        <button className={styles.rankingsButton}>Rankings</button>
+                        <button
+                            onClick={() => navigate(ALL_NFTS_PATH)}
+                            className={styles.exploreButton}
+                        >
+                            Explore
+                        </button>
+                        <button
+                            onClick={() => navigate(CREATE_NFT_PATH)}
+                            className={styles.rankingsButton}
+                        >
+                            Create
+                        </button>
                     </div>
                 </div>
                 <HotCollection

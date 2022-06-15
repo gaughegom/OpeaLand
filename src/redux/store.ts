@@ -4,6 +4,8 @@ import collectionSlice from "../features/collection/collectionSlice";
 import menuAllNFTsCriteriaSlice from "../features/allNFTs/components/menuSide/menuCriteriaSlice";
 import menuCollectionCriteriaSlice from "../features/collection/components/menuSide/menuCriteriaSlice";
 import walletSlice from "../features/wallet/walletSlice";
+import notifySlice from "../components/Notify/notifySlice";
+import createNFTSlice from "../features/createNFT/createNFTSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,7 +13,9 @@ export const store = configureStore({
     menuAllNFTsCriteria: menuAllNFTsCriteriaSlice,
     menuCollectionCriteria: menuCollectionCriteriaSlice,
     collection: collectionSlice,
-    wallet: walletSlice
+    wallet: walletSlice,
+    notify: notifySlice,
+    createNFT: createNFTSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

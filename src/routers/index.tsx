@@ -3,8 +3,9 @@ import routes from "../routes";
 
 import Header from "../features/header/";
 import Footer from "../features/footer";
+import { NotifyStack } from "../components/Notify";
 
-import {HOME_PATH} from '../routes'
+import { HOME_PATH } from "../routes";
 
 import React from "react";
 
@@ -49,6 +50,7 @@ const Routers = () => {
                 })}
             </Routes>
             <Footer></Footer>
+            <NotifyStack></NotifyStack>
         </React.Suspense>
     );
 };

@@ -10,13 +10,20 @@ import BallotIcon from "@mui/icons-material/Ballot";
 import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
 
 import Collection from "./components/collection";
+import PlaceBid from "./components/placeBid";
 
 import { IItemModel, IItemMetadataModel } from "../../../model/Item.model";
 import { http } from "../../services/AxiosHelper";
 import { ALL_ITEMS } from "../../services/APIurls";
 import formatAddress from "../../utils/formatAddress";
+import SvgEthIcon from "../svg/svgEthIcon";
 import { ethers } from "ethers";
 
+const ITEM_STATUS = {
+    BID: "bid",
+    SALE: "sale",
+    NULL: "null",
+};
 
 const mockAPI = {
     thumbLink:
@@ -27,7 +34,7 @@ const mockAPI = {
     author: "Ghost-Maker",
     isFavorite: true,
     price: 0.008,
-    status: "bid",
+    status: "sale",
     saleEnd: "6/3/2022",
     description:
         "Using your past experiences, evolve to become the best version of yourself in the present, taking each moment in time as a gift.",
@@ -83,6 +90,17 @@ const mockAPI = {
 export default function Item() {
     const params = useParams();
     const [item, setItem] = useState<IItemModel>();
+
+    const [openPlaceBid, setOpenPlaceBid] = useState<boolean>(false);
+    const [pricePlaceBid, setPricePlaceBid] = useState<number>(0);
+
+    const handleClosePlaceBid = () => {
+        setOpenPlaceBid(false);
+    };
+    const handleOpenPlaceBid = () => {
+        setOpenPlaceBid(true);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             const newItem: IItemModel = (
@@ -156,13 +174,18 @@ export default function Item() {
                     <div className={styles["name"]}>{item?.name}</div>
                     <p className={styles["author"]}>
                         Owned by{" "}
-                        <span style={{ color: "var(--primaryColor)" }} className = {styles.link}>
-                            {!item?.ownerDisplay ? formatAddress(item?.owner) : item?.ownerDisplay}
+                        <span
+                            style={{ color: "var(--primaryColor)" }}
+                            className={styles.link}
+                        >
+                            {!item?.ownerDisplay
+                                ? formatAddress(item?.owner)
+                                : item?.ownerDisplay}
                         </span>
                     </p>
 
                     <div className={styles["box-buynow"]}>
-                        {item?.status !== "null" && (
+                        {item?.status !== ITEM_STATUS.NULL && (
                             <React.Fragment>
                                 <div className={styles.saleEnd}>
                                     Sale end at {item?.endAt.toString()}
@@ -178,19 +201,36 @@ export default function Item() {
                                         fontWeight: "normal",
                                     }}
                                 >
-                                    {item?.status === "sell"
+                                    {item?.status === ITEM_STATUS.SALE
                                         ? "Current price"
                                         : "Minimum bid"}
                                 </div>
-                                <div>{item && ethers.utils.formatEther(item.price)} Eth</div>
+                                <div>
+                                    {item &&
+                                        ethers.utils.formatEther(
+                                            item.price
+                                        )}{" "}
+                                    <span>
+                                        <SvgEthIcon
+                                            style={{
+                                                marginRight: "8px",
+                                                width: "16px",
+                                                height: "16px",
+                                            }}
+                                        />
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className={styles.button}>
+                            <div
+                                className={styles.button}
+                                onClick={handleOpenPlaceBid}
+                            >
                                 <AccountBalanceWalletIcon
                                     sx={{ fontSize: 28 }}
                                 ></AccountBalanceWalletIcon>
                                 <div>
-                                    {mockAPI.status === "sale"
+                                    {item?.status === ITEM_STATUS.SALE
                                         ? "Buy now"
                                         : "Place bid"}
                                 </div>
@@ -231,6 +271,15 @@ export default function Item() {
             <div className={styles.viewCollection}>
                 <div className={styles.button}>View collection</div>
             </div>
+
+            <PlaceBid
+                open={openPlaceBid}
+                setOpen={setOpenPlaceBid}
+                handleClose={handleClosePlaceBid}
+                price={pricePlaceBid}
+                setPrice={setPricePlaceBid}
+                minBid={ethers.utils.formatEther(item ? item.price : "0")}
+            />
         </div>
     );
 }

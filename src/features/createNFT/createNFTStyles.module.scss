@@ -182,3 +182,17 @@
         }
     }
 }
+.select_item {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 16px;
+}
+.select_item_noresult {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    font-size: 16px;
+}

@@ -10,7 +10,7 @@ import Divider from "@mui/material/Divider";
 import CardItem from "../../../allNFTs/components/cardItem"
 
 import { ALL_ITEMS } from "../../../../services/APIurls";
-import {IItemModel} from "../../../../../model/Item.model"
+import {IItemModel} from "../../../../model/Item.model"
 
 export default function Collection() {
     //api

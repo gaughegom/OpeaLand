@@ -5,7 +5,7 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, Contract, ContractFactory } from "ethers";
 import { contractFactory } from "../utils";
-import { IAssetDomain } from "../model/Asset.model";
+import { IAssetDomain } from "../src/model/Asset.model";
 
 let signers: SignerWithAddress[];
 let owner: SignerWithAddress;
@@ -19,38 +19,38 @@ const tokenId: BigNumber = BigNumber.from(1);
 let assetDomain: IAssetDomain;
 
 const hashKey = ethers.utils.solidityKeccak256(
-	["address", "uint256"],
-	[token, tokenId.toString()]
+  ["address", "uint256"],
+  [token, tokenId.toString()]
 );
 
 describe("# MockHashAsset", () => {
-	before(async () => {
-		signers = await ethers.getSigners();
-		owner = signers[1];
+  before(async () => {
+    signers = await ethers.getSigners();
+    owner = signers[1];
 
-		MockHash = await ethers.getContractFactory(contractFactory.MockHashAsset);
+    MockHash = await ethers.getContractFactory(contractFactory.MockHashAsset);
 
-		assetDomain = {
-			token,
-			tokenId,
-			seller: owner.address
-		};
-	});
+    assetDomain = {
+      token,
+      tokenId,
+      seller: owner.address
+    };
+  });
 
-	beforeEach(async () => {
-		mockHashIns = await MockHash.connect(owner).deploy();
-		await mockHashIns.deployed();
-	});
+  beforeEach(async () => {
+    mockHashIns = await MockHash.connect(owner).deploy();
+    await mockHashIns.deployed();
+  });
 
-	it("should hash token & tokenId", async () => {
-		expect(
-			await mockHashIns.hashKeyWithToken(token, tokenId.toString())
-		).to.be.equal(hashKey);
-	});
+  it("should hash token & tokenId", async () => {
+    expect(
+      await mockHashIns.hashKeyWithToken(token, tokenId.toString())
+    ).to.be.equal(hashKey);
+  });
 
-	it("should hash sell asset", async () => {
-		expect(await mockHashIns.hashKeyWithDomain(assetDomain)).to.be.equal(
-			hashKey
-		);
-	});
+  it("should hash sell asset", async () => {
+    expect(await mockHashIns.hashKeyWithDomain(assetDomain)).to.be.equal(
+      hashKey
+    );
+  });
 });

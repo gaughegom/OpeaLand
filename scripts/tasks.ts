@@ -14,6 +14,24 @@ task(
   }
 );
 
+task("hash-asset", "hash asset to bytes23")
+  .addParam("token")
+  .addParam("tokenId")
+  .setAction(async function (taskArgs, hre) {
+    const hashBytes32 = ethers.utils.solidityKeccak256(
+      ["address", "uint256"],
+      [taskArgs.token, taskArgs.tokenId]
+    );
+    console.log(`hash: ${hashBytes32}`);
+  });
+
+task("hash-role").setAction(async function (taskArgs, hre) {
+  const exchangeRole = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes("EXCHANGE_ROLE")
+  );
+  console.log(exchangeRole);
+});
+
 task("deploy-migrate", "Test deploy a migration contract").setAction(
   async function (taskArgs, hre) {
     const MigrationContract = await hre.ethers.getContractFactory(
@@ -26,6 +44,99 @@ task("deploy-migrate", "Test deploy a migration contract").setAction(
     console.log(`Migration contract deploy to: ${migrationIns.address}`);
   }
 );
+
+task("deploy-local", "deploy contract on localhost").setAction(async function (
+  taskArgs,
+  hre
+) {
+  const HolderFactory = await hre.ethers.getContractFactory(
+    contractFactory.Holder
+  );
+  const TransferProxyFactory = await hre.ethers.getContractFactory(
+    contractFactory.TransferProxy
+  );
+  const ExchangeSellFactory = await hre.ethers.getContractFactory(
+    contractFactory.ExchangeSell
+  );
+  const ExchangeAuctionFactory = await hre.ethers.getContractFactory(
+    contractFactory.ExchangeAuction
+  );
+  const ExchangeFactory = await hre.ethers.getContractFactory(
+    contractFactory.Exchange
+  );
+  const ERC721LandFactory = await hre.ethers.getContractFactory(
+    contractFactory.ERC721Land
+  );
+  const ERC721DefaultFactory = await hre.ethers.getContractFactory(
+    contractFactory.ERC721Default
+  );
+
+  // deploy transferProxy contract
+  const transferProxyIns = await TransferProxyFactory.deploy();
+  // deploy holder contract
+  const holderIns = await HolderFactory.deploy();
+  await transferProxyIns.deployed();
+  await holderIns.deployed();
+
+  console.log(`transferProxy: ${transferProxyIns.address}`);
+  console.log(`holder: ${holderIns.address}`);
+
+  // deploy default collection
+  const erc721Ins = await ERC721LandFactory.deploy(
+    "Openland Collection NFT",
+    "OCN",
+    transferProxyIns.address
+  );
+  await erc721Ins.deployed();
+  const erc721DefaultIns = await ERC721DefaultFactory.deploy();
+  await erc721DefaultIns.deployed();
+  // transfer & set default
+  await (await erc721Ins.transferOwnership(erc721DefaultIns.address)).wait();
+  await (await erc721DefaultIns.setDefault(erc721Ins.address)).wait();
+
+  console.log(`erc721: ${erc721Ins.address}`);
+  console.log(`erc721Default: ${erc721DefaultIns.address}`);
+
+  // deploy exchangeSell contract
+  const exchangeSellIns = await ExchangeSellFactory.deploy(
+    transferProxyIns.address,
+    holderIns.address
+  );
+  await exchangeSellIns.deployed();
+  // deploy exchangeAuction contract
+  const exchangeAuctionIns = await ExchangeAuctionFactory.deploy(
+    transferProxyIns.address,
+    holderIns.address
+  );
+  await exchangeAuctionIns.deployed();
+
+  // deploy exchange contract
+  const exchangeIns = await ExchangeFactory.deploy(
+    exchangeAuctionIns.address,
+    exchangeSellIns.address,
+    holderIns.address
+  );
+  await exchangeIns.deployed();
+
+  console.log(`exchangeSell: ${exchangeSellIns.address}`);
+  console.log(`exchangeAuction: ${exchangeAuctionIns.address}`);
+  console.log(`exchange: ${exchangeIns.address}`);
+
+  // add operators
+  await (await transferProxyIns.add(exchangeSellIns.address)).wait();
+  await (await transferProxyIns.add(exchangeAuctionIns.address)).wait();
+
+  // grant access holder
+  const exchangeRole = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes("EXCHANGE_ROLE")
+  );
+  await (
+    await holderIns.grantAccess(exchangeRole, exchangeSellIns.address)
+  ).wait();
+  await (
+    await holderIns.grantAccess(exchangeRole, exchangeAuctionIns.address)
+  ).wait();
+});
 
 task("deploy", "Deploy contract on chain").setAction(async function (
   taskArgs,

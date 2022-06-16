@@ -12,6 +12,8 @@ contract ERC721Land is ERC721Enumerable, ProxyAccess, HasTokenUri {
 	
 	Counters.Counter private _tokenIdCounter;
 	bytes32 public constant TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
+
+	event MintToken(address indexed minter, uint256 indexed tokenId);
 	
 	constructor(
 		string memory _name, 
@@ -27,6 +29,8 @@ contract ERC721Land is ERC721Enumerable, ProxyAccess, HasTokenUri {
 		uint256 newTokenId = _tokenIdCounter.current();
 		_safeMint(to, newTokenId);
 		_setTokenUri(newTokenId, tokenUri);
+
+		emit MintToken(to, newTokenId);
 
 		return newTokenId;
 	}

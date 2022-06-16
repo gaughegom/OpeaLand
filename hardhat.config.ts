@@ -29,11 +29,14 @@ module.exports = {
   defaultNetwork: "rinkeby",
   networks: {
     hardhat: {
-      chainId: 1337
+      chainId: 1337,
+      gas: 2100000,
+      gasPrice: 225000000000
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${PROJECT_ID}`,
       accounts: [`${DEPLOYER_PRIVATE_KEY}`],
+      gas: 2100000,
       gasPrice: 225000000000
     }
   },

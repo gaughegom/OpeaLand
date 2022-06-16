@@ -9,7 +9,7 @@ import CardItem from "../allNFTs/components/cardItem";
 import Criteria from "./components/criteria";
 
 import { useAppSelector } from "../../hooks";
-import { IItemModel } from "../../../model/Item.model";
+import { IItemModel } from "../../model/Item.model";
 import { ALL_ITEMS } from "../../services/APIurls";
 import { http } from "../../services/AxiosHelper";
 

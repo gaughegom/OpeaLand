@@ -23,7 +23,7 @@ import CardItemCollection from "../collections/components/cardCollection";
 import { COLLECTION_PATH } from "../../routes";
 import { validateEmail, validateUserName } from "./helper";
 
-import {IItemModel} from '../../../model/Item.model'
+import {IItemModel} from '../../model/Item.model'
 
 
 const user = {

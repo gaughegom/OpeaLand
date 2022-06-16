@@ -7,8 +7,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ERC721Default is Ownable {
 	ERC721Land erc721;
 
+	event MintAtDefault(address indexed sender, uint256 indexed tokenId);
+
 	function mint(string memory tokenUri) external {
-		erc721.mint(_msgSender(), tokenUri);
+		uint256 tokenId = erc721.mint(_msgSender(), tokenUri);
+		emit MintAtDefault(_msgSender(), tokenId);
 	}
 
 	function setDefault(address _erc721) external onlyOwner {

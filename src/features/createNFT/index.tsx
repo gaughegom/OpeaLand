@@ -20,6 +20,12 @@ import { sliceString } from "../../utils/strimString";
 import MenuItem from "@mui/material/MenuItem";
 import InputBase from "@mui/material/InputBase";
 import InputLabel from "@mui/material/InputLabel";
+import { ethers } from "ethers";
+
+// contract import
+import { contractAddresses } from '../../config'
+import ERC721Default from '../../abi/contracts/token/ERC721Default.sol/ERC721Default.json'
+import ExchangeSell from '../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json'
 
 function RequestSymbol() {
     return <span className={styles.require}>*</span>;
@@ -59,6 +65,7 @@ export default function CreateNFT() {
         },
     }));
 
+    const currentSigner = useAppSelector((state) => state.wallet.signer);
     React.useEffect(() => {
         // styling save button
         if (nameInput && selectedAvt && priceInput) {
@@ -81,7 +88,7 @@ export default function CreateNFT() {
                 dispatch(removeNotify(notify));
             }, 10000);
         }
-    }, [nameInput, selectedAvt, priceInput, createResult, collectionInput]);
+    }, [nameInput, selectedAvt, priceInput, createResult, collectionInput, currentSigner]);
 
     const onChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNameInput(e.target.value);
@@ -130,6 +137,22 @@ export default function CreateNFT() {
         //     },
         // };
         // formData.append("postData", JSON.stringify(newObject));
+      
+        // load contract
+        const erc721DefaultContract = new ethers.Contract(contractAddresses.erc721Default, ERC721Default.abi, currentSigner)
+      const exchangeSellContract = new ethers.Contract(contractAddresses.exchangeSell, ExchangeSell.abi, currentSigner);
+      
+        // mint token
+        const txMint = await erc721DefaultContract.mint('ipfs://test.com');
+        const txReceipt = await txMint.wait();
+        var tokenId = txReceipt.events[2].args[1].toString()
+      
+      const txList = await exchangeSellContract.list(contractAddresses.erc721, tokenId, ethers.utils.parseEther('0.002'))
+      const txListReceipt = await txList.wait();
+
+      console.log(txList)
+      console.log(txListReceipt)
+
         setTimeout(async () => {
             setCreateResult(await sendData(formData));
             console.log(formData);

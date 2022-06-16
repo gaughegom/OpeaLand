@@ -12,7 +12,7 @@ import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
 import Collection from "./components/collection";
 import PlaceBid from "./components/placeBid";
 
-import { IItemModel, IItemMetadataModel } from "../../../model/Item.model";
+import { IItemModel, IItemMetadataModel } from "../../model/Item.model";
 import { http } from "../../services/AxiosHelper";
 import { ALL_ITEMS } from "../../services/APIurls";
 import formatAddress from "../../utils/formatAddress";

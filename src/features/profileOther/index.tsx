@@ -16,7 +16,7 @@ import Grid from "@mui/material/Grid";
 
 import { validateEmail, validateUserName } from "./helper";
 
-import {IItemModel} from '../../../model/Item.model'
+import {IItemModel} from '../../model/Item.model'
 
 
 const user = {

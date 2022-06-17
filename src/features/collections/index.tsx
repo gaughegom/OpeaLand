@@ -10,6 +10,9 @@ import CardItem from "./components/cardCollection";
 
 import { Props } from "../collections/components/cardCollection";
 import { COLLECTION_PATH } from "../../routes";
+import {ICollectionModel} from '../../model/Collection.model'
+import {http} from '../../services/AxiosHelper'
+import {GET_ALL_COLLECTIONS} from '../../services/APIurls'
 
 const mockAPIs: Props[] = [
     {
@@ -43,6 +46,15 @@ const mockAPIs: Props[] = [
 
 export default function () {
     const navigate = useNavigate();
+
+    var allCollections: ICollectionModel[] = [];
+
+    React.useEffect(() => {
+        const fetchData = async() => {
+            const result = await http.get<any>(GET_ALL_COLLECTIONS)
+            console.log(result)
+        }
+    })
 
     return (
         <div>

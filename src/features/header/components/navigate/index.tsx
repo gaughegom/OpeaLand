@@ -8,18 +8,23 @@ import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalance
 // import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 // import GridOnIcon from "@mui/icons-material/GridOn";
 import PersonIcon from "@mui/icons-material/Person";
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import {
     ALL_NFTS_PATH,
     ALL_COLLECTIONS_PATH,
     PROFILE_PATH,
     LOGIN_PATH,
-    CREATE_NFT_PATH
+    CREATE_NFT_PATH,
 } from "../../../../routes";
 import { walletConnector } from "../../../wallet/walletConnector";
-import { useAppDispatch, useAppSelector, useDetectWalletChange } from "../../../../hooks";
+import {
+    useAppDispatch,
+    useAppSelector,
+    useDetectWalletChange,
+} from "../../../../hooks";
 import { setWalletProvider, WalletProvider } from "../../../wallet/walletSlice";
+import { pushNotify } from "../../../../components/Notify/notifySlice";
 
 export default function Navigate() {
     const navigate = useNavigate();
@@ -62,7 +67,7 @@ export default function Navigate() {
         {
             iconLink: <LogoutIcon sx={{ fontSize: 24 }} />,
             title: "Log Out",
-            path: LOGIN_PATH
+            path: LOGIN_PATH,
         },
     ];
     //   const walletItem = [{ iconLink: "", title: "" }];
@@ -76,7 +81,7 @@ export default function Navigate() {
         dispatch(setWalletProvider(await walletConnector()));
     };
 
-	useDetectWalletChange();
+    useDetectWalletChange();
 
     React.useEffect(() => {
         loadWallet();
@@ -120,7 +125,10 @@ export default function Navigate() {
                 </div>
             </div> */}
 
-            <div className={styles.item} onClick={() => navigate(CREATE_NFT_PATH)}>
+            <div
+                className={styles.item}
+                onClick={() => navigate(CREATE_NFT_PATH)}
+            >
                 <p>Create</p>
             </div>
 
@@ -128,7 +136,19 @@ export default function Navigate() {
                 <AccountCircleOutlinedIcon sx={iconButtonStyles} />
                 <div className={styles["dropDownContent--right"]}>
                     {userItem.map((item, key) => (
-                        <div onClick={() => navigate(item.path)} key={key} className={styles.dropDownItem}>
+                        <div
+                            onClick={() => {
+                                navigate(item.path);
+                                const notify = {
+                                    id: Date.now().toString(),
+                                    type: "success",
+                                    message: "Logout succesfully.",
+                                };
+                                dispatch(pushNotify(notify));
+                            }}
+                            key={key}
+                            className={styles.dropDownItem}
+                        >
                             <div className={styles.icon}>{item.iconLink}</div>
                             <p className={styles.title}>{item.title}</p>
                         </div>

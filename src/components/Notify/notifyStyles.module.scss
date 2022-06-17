@@ -18,7 +18,7 @@
         flex-direction: row;
         align-items: center;
         .indicator {
-            width: 4px;
+            width: 8px;
             height: 100%;
             &__success {
                 @extend .indicator;

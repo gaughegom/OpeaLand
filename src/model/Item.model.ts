@@ -2,10 +2,14 @@ export interface IItemMetadataModel {
     imageUrl: string,
     description: string,
     name: string,
-    attributes: [{
-        trait: string,
-        value: string,
-    }],
+    // attributes: [{
+    //     trait: string,
+    //     value: string,
+    // }],
+    properties: {
+        type: string,
+        name: string,
+    }
 }
 
 export interface IItemModel {

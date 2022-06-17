@@ -66,16 +66,16 @@ export default function CardItem(prop: Props) {
                     </Grid>
                 </Grid>
             </div>
-            <div className={styles.action}>
+            {/* <div className={styles.action}>
                 <div className={styles.button}>Buy now</div>
-                {/* <div className={styles.icon}>
+                <div className={styles.icon}>
                     {prop.isFavorite ? (
                         <FavoriteIcon sx={{ fontSize: 24 }} />
                     ) : (
                         <FavoriteBorderIcon sx={{ fontSize: 24 }} />
                     )}
-                </div> */}
-            </div>
+                </div>
+            </div> */}
         </div>
     );
 }

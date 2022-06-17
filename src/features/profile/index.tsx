@@ -23,8 +23,11 @@ import CardItemCollection from "../collections/components/cardCollection";
 import { COLLECTION_PATH } from "../../routes";
 import { validateEmail, validateUserName } from "./helper";
 
-import {IItemModel} from '../../model/Item.model'
+import { IItemModel } from "../../model/Item.model";
+import formatAddress from "../../utils/formatAddress";
 
+import { useAppSelector, useAppDispatch} from "../../hooks";
+import {pushNotify} from "../../components/Notify/notifySlice"
 
 const user = {
     name: "John",
@@ -151,15 +154,16 @@ export default function Profile() {
     };
     //------
     //save
-    const [openNoti, setOpenNoti] = useState(false);
     const handleSaveClick = () => {
-        alert("Save");
-        setOpenNoti(true);
-        setTimeout(() => {
-            setOpenNoti(false);
-        }, 5000)
+        // alert("Save");
+        // setOpenNoti(true);
+        // setTimeout(() => {
+        //     setOpenNoti(false);
+        // }, 5000);
     };
     //----------------
+    const dispatch = useAppDispatch();
+
     return (
         <div>
             {/* banner */}
@@ -194,11 +198,18 @@ export default function Profile() {
                     <div className={styles.name}>{user.name}</div>
                     <div
                         className={styles.address}
-                        onClick={() =>
-                            navigator.clipboard.writeText(user.address)
-                        }
+                        onClick={() => {
+                            navigator.clipboard.writeText(user.address);
+                            const notify = {
+                                id: Date.now().toString(),
+                                type: "success",
+                                message: "Copied."
+                            }
+                            dispatch(pushNotify(notify))
+
+                        }}
                     >
-                        <div>{user.address}</div>
+                        <div>{formatAddress(user.address)}</div>
                         <ContentCopyIcon
                             sx={{ fontSize: 20 }}
                         ></ContentCopyIcon>
@@ -240,7 +251,7 @@ export default function Profile() {
                                             columnSpacing={2}
                                             className={styles.boxItem}
                                         >
-                                            {items.map((item,idx) => (
+                                            {items.map((item, idx) => (
                                                 <Grid item md={3} key={idx}>
                                                     <CardItem
                                                         thumbLink={
@@ -480,19 +491,6 @@ export default function Profile() {
                                         </div>
                                     </div>
                                 </div>
-                                {openNoti && (
-                                    <div className={styles.notification}>
-                                        <div className={styles.icon}>
-                                            <CheckCircleIcon
-                                                sx={{
-                                                    fontSize: 24,
-                                                    color: "green",
-                                                }}
-                                            ></CheckCircleIcon>
-                                        </div>
-                                        <div>Save successfully</div>
-                                    </div>
-                                )}
                             </div>
                         )}
                         {/* --- */}

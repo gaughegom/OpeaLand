@@ -15,11 +15,11 @@ import { sendData } from "./helper";
 
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { pushNotify, removeNotify } from "../../components/Notify/notifySlice";
+import formatAddress from '../../utils/formatAddress'
 
 import { sliceString } from "../../utils/strimString";
 import MenuItem from "@mui/material/MenuItem";
 import InputBase from "@mui/material/InputBase";
-import InputLabel from "@mui/material/InputLabel";
 import { ethers } from "ethers";
 
 // contract import
@@ -269,7 +269,7 @@ export default function CreateNFT() {
                                 <MenuItem value={item.address} key={idx}>
                                     <div className={styles.select_item}>
                                         <p>{item.collectionName}</p>
-                                        <p>{sliceString(item.address, 20)}</p>
+                                        <p>{formatAddress(item.address)}</p>
                                     </div>
                                 </MenuItem>
                             ))

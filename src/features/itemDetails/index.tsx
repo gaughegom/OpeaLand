@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import styles from "./itemDetailsStyles.module.scss";
 
@@ -11,6 +11,7 @@ import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
 
 import Collection from "./components/collection";
 import PlaceBid from "./components/placeBid";
+import Buy from "./components/buy";
 
 import { IItemModel, IItemMetadataModel } from "../../model/Item.model";
 import { http } from "../../services/AxiosHelper";
@@ -18,6 +19,7 @@ import { ALL_ITEMS } from "../../services/APIurls";
 import formatAddress from "../../utils/formatAddress";
 import SvgEthIcon from "../svg/svgEthIcon";
 import { ethers } from "ethers";
+import ListIcon from '@mui/icons-material/List'
 
 const ITEM_STATUS = {
     BID: "bid",
@@ -89,10 +91,12 @@ const mockAPI = {
 
 export default function Item() {
     const params = useParams();
+    const navigate = useNavigate();
     const [item, setItem] = useState<IItemModel>();
 
     const [openPlaceBid, setOpenPlaceBid] = useState<boolean>(false);
     const [pricePlaceBid, setPricePlaceBid] = useState<number>(0);
+    const [openBuy, setOpenBuy] = useState<boolean>(false);
 
     const handleClosePlaceBid = () => {
         setOpenPlaceBid(false);
@@ -100,6 +104,8 @@ export default function Item() {
     const handleOpenPlaceBid = () => {
         setOpenPlaceBid(true);
     };
+    const handleOpenBuy = () => setOpenBuy(true);
+    const handleCloseBuy = () => setOpenBuy(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -109,14 +115,13 @@ export default function Item() {
                         `?token=${params.token}&tokenId=${params.tokenId}`
                 )
             ).data[0];
-
             if (newItem) {
                 const newMetaData: IItemMetadataModel = (
                     await http.get<IItemMetadataModel>(newItem.ipfsUrl!)
                 ).data;
                 newItem.metadata = newMetaData;
+                setItem(newItem);
             }
-            setItem(newItem);
         };
 
         fetchData();
@@ -163,12 +168,38 @@ export default function Item() {
                                 </div>
                             </div>
                         </div>
+
+                        <Divider></Divider>
+
+                        <div className={styles.details}>
+                            <div className={styles.title}>
+                            <ListIcon sx={{ fontSize: 24 }} />
+
+                                <div>Properties</div>
+                            </div>
+                            <Divider></Divider>
+                            <div className={styles.content}>
+                                <div className={styles.row}>
+                                    <div>Contact address</div>
+                                    <div>{formatAddress(item?.token)}</div>
+                                </div>
+                                <div className={styles.row}>
+                                    <div>Token ID</div>
+                                    <div>{formatAddress(item?.tokenId)}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* right */}
                 <div className={styles.right}>
-                    <div className={styles["collection-name"]}>
+                    <div
+                        onClick={() => {
+                            navigate(`/collection/${item?.token}`);
+                        }}
+                        className={styles["collection-name"]}
+                    >
                         {item?.collectionName}
                     </div>
                     <div className={styles["name"]}>{item?.name}</div>
@@ -224,7 +255,7 @@ export default function Item() {
 
                             <div
                                 className={styles.button}
-                                onClick={handleOpenPlaceBid}
+                                onClick={handleOpenBuy}
                             >
                                 <AccountBalanceWalletIcon
                                     sx={{ fontSize: 28 }}
@@ -238,7 +269,7 @@ export default function Item() {
                         </div>
                     </div>
 
-                    <div className={styles.boxPriceList}>
+                    {/* <div className={styles.boxPriceList}>
                         <div className={styles.title}>
                             <ShowChartIcon
                                 sx={{ fontSize: 24 }}
@@ -262,7 +293,7 @@ export default function Item() {
                                 })}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
@@ -272,14 +303,24 @@ export default function Item() {
                 <div className={styles.button}>View collection</div>
             </div>
 
-            <PlaceBid
-                open={openPlaceBid}
-                setOpen={setOpenPlaceBid}
-                handleClose={handleClosePlaceBid}
-                price={pricePlaceBid}
-                setPrice={setPricePlaceBid}
-                minBid={ethers.utils.formatEther(item ? item.price : "0")}
-            />
+            {item && (
+                <PlaceBid
+                    open={openPlaceBid}
+                    setOpen={setOpenPlaceBid}
+                    handleClose={handleClosePlaceBid}
+                    price={pricePlaceBid}
+                    setPrice={setPricePlaceBid}
+                    minBid={ethers.utils.formatEther(item ? item.price : "0")}
+                />
+            )}
+            {item && (
+                <Buy
+                    open={openBuy}
+                    handleClose={handleCloseBuy}
+                    setOpen={setOpenBuy}
+                    item={item}
+                ></Buy>
+            )}
         </div>
     );
 }

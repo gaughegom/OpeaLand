@@ -13,6 +13,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CardItem from "../allNFTs/components/cardItem";
 
 import { ALL_ITEMS } from "../../services/APIurls";
+import { CREATE_COLLECTION_PATH } from "../../routes";
 import { itemType } from "../allNFTs";
 import Grid from "@mui/material/Grid";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -275,9 +276,9 @@ export default function Profile() {
                             </div>
                         )}
 
-                        {/* {currentIndicator === 2 && (
-                            <div>
-                                {mockAPI !== [] ? (
+                        {currentIndicator === 2 && (
+                            <div className={styles.container}>
+                                {/* {mockAPI !== [] ? (
                                     <Grid
                                         container
                                         rowSpacing={2}
@@ -298,9 +299,11 @@ export default function Profile() {
                                     </Grid>
                                 ) : (
                                     noItem
-                                )}
+                                )} */}
+                                <div onClick={() => navigate(CREATE_COLLECTION_PATH)}className={styles.createBtn}>Create a collection</div>
+                                <div>abc</div>
                             </div>
-                        )} */}
+                        )}
 
                         {currentIndicator === 3 && (
                             <div className={styles.profileSetting}>

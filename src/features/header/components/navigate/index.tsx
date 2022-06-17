@@ -24,7 +24,7 @@ import {
     useDetectWalletChange,
 } from "../../../../hooks";
 import { setWalletProvider, WalletProvider } from "../../../wallet/walletSlice";
-import { pushNotify } from "../../../../components/Notify/notifySlice";
+import { pushNotify, removeNotify } from "../../../../components/Notify/notifySlice";
 
 export default function Navigate() {
     const navigate = useNavigate();
@@ -139,12 +139,17 @@ export default function Navigate() {
                         <div
                             onClick={() => {
                                 navigate(item.path);
-                                const notify = {
-                                    id: Date.now().toString(),
-                                    type: "success",
-                                    message: "Logout succesfully.",
-                                };
-                                dispatch(pushNotify(notify));
+                                if (item.path === LOGIN_PATH) {
+                                    const notify = {
+                                        id: Date.now().toString(),
+                                        type: "success",
+                                        message: "Logout succesfully.",
+                                    };
+                                    dispatch(pushNotify(notify));
+                                    setTimeout(() => {
+                                        dispatch(removeNotify(notify));
+                                    }, 5000)
+                                }
                             }}
                             key={key}
                             className={styles.dropDownItem}

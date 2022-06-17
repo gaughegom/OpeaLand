@@ -7,6 +7,7 @@ const Item = React.lazy(() => import("./features/itemDetails"));
 const Profile = React.lazy(() => import("./features/profile"))
 const ProfileOther = React.lazy(() => import("./features/profileOther"))
 const CreateNFT = React.lazy(() => import("./features/createNFT"))
+const CreateCollection = React.lazy(() => import("./features/createCollection"))
 
 export const ALL_NFTS_PATH = "/explore-all-nfts";
 export const ALL_COLLECTIONS_PATH = "/explore-collections";
@@ -17,6 +18,7 @@ export const LOGIN_PATH = '/'
 export const ITEM_PATH = "/collection/:token/item/:tokenId"
 export const CREATE_NFT_PATH = '/create'
 export const PROFILE_OTHER_PATH = '/:address'
+export const CREATE_COLLECTION_PATH = '/collection/create'
 
 type routeType = {
     path: string;
@@ -57,6 +59,10 @@ const protectedRoute: routeType[] = [
         path: CREATE_NFT_PATH,
         element: <CreateNFT />,
     },
+    {
+        path: CREATE_COLLECTION_PATH,
+        element: <CreateCollection />,
+    }
 ];
 
 const routes = {

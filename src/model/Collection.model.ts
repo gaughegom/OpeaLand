@@ -4,4 +4,6 @@ export interface ICollectionModel {
     symbol: string,
     amount: number,
     creator: string,
+    bannerUrl: string,
+    logoUrl: string,
 }

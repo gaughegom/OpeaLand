@@ -16,7 +16,9 @@ export const notifySlice = createSlice({
     initialState,
     reducers: {
         pushNotify: (state, action: PayloadAction<NotifyProps>) => {
-            if (action.payload) state.notiStack.push(action.payload);
+            if (action.payload) {
+                state.notiStack.push(action.payload);
+            }
         },
         removeNotify: (state, action: PayloadAction<NotifyProps>) => {
             state.notiStack = state.notiStack.filter(

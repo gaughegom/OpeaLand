@@ -139,6 +139,7 @@
                 color: rgb(112 122 131);
                 &:hover {
                     cursor: pointer;
+                    opacity: 0.9;
                 }
                 &_active {
                     @extend .indicator;
@@ -149,6 +150,20 @@
         }
         .container {
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            .createBtn {
+                width: fit-content;
+                padding: 16px 24px;
+                color: white;
+                background-color: var(--primaryColor);
+                border-radius: 12px;
+                &:hover{
+                    cursor: pointer;
+                    opacity: 0.9;
+                }
+            }
         }
         .profileSetting {
             display: flex;

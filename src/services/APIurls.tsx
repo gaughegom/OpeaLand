@@ -7,3 +7,4 @@ export const INSERT_ITEM = "/item";
 export const GET_WALLET = "/wallet";
 export const UPDATE_WALLET = "/wallet";
 export const INSERT_COLLECTION = "/collection";
+export const GET_COLLECTION_BY_OWNER = "/collection";

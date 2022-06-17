@@ -9,5 +9,7 @@ export const useDetectWalletChange = async () => {
     window.ethereum.on("accountsChanged", async function () {
       dispatch(setWalletProvider(await walletConnector()));
     });
+
+    localStorage.clear();
   }, [dispatch]);
 };

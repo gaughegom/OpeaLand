@@ -32,6 +32,9 @@ import ERC721Default from "../../abi/contracts/token/ERC721Default.sol/ERC721Def
 import ExchangeSell from "../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json";
 import SvgEthIcon from "../svg/svgEthIcon";
 import { isValid } from "date-fns/esm";
+import { http } from "../../services/AxiosHelper";
+import { GET_COLLECTION_BY_OWNER } from "../../services/APIurls";
+import { ICollectionModel } from "../../model/Collection.model";
 
 function RequestSymbol() {
   return <span className={styles.require}>*</span>;
@@ -44,9 +47,9 @@ export default function CreateNFT() {
   const [saveClass, setSaveClass] = React.useState("save_disable");
   const [isLoading, setIsLoading] = React.useState(false);
   const [createResult, setCreateResult] = React.useState<any>(undefined);
-  const [myCollections, setMyCollections] = React.useState<
-    { collectionName: string; address: string }[]
-  >([]);
+  const [myCollections, setMyCollections] = React.useState<ICollectionModel[]>(
+    []
+  );
   const statuses = [
     {
       status: "Sell",
@@ -70,6 +73,20 @@ export default function CreateNFT() {
   const [properties, setProperties] = React.useState<
     { type: string; name: string; id: string }[]
   >([]);
+  React.useEffect(() => {
+    const fetchCollection = async () => {
+      try {
+        const result = await http.get<any>(
+          `${GET_COLLECTION_BY_OWNER}/${me?.address}`
+        );
+        setMyCollections(result.data);
+      } catch (e: any) {
+        console.log(e);
+      }
+    };
+
+    fetchCollection();
+  }, [me]);
 
   const SelectCustom = styled(InputBase)(({ theme }) => ({
     "& .MuiInputBase-input": {
@@ -392,10 +409,10 @@ export default function CreateNFT() {
               </MenuItem>
             ) : (
               myCollections.map((item, idx) => (
-                <MenuItem value={item.address} key={idx}>
+                <MenuItem value={item.token} key={idx}>
                   <div className={styles.select_item}>
-                    <p>{item.collectionName}</p>
-                    <p>{formatAddress(item.address)}</p>
+                    <p>{item.name}</p>
+                    <p>{formatAddress(item.token)}</p>
                   </div>
                 </MenuItem>
               ))

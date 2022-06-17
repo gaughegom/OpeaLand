@@ -24,6 +24,7 @@ import { ethers } from "ethers";
 import { contractAddresses } from "../../config";
 import ERC721Default from "../../abi/contracts/token/ERC721Default.sol/ERC721Default.json";
 import ExchangeSell from "../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json";
+import ERC721Land from "../../abi/contracts/token/ERC721Land.sol/ERC721Land.json";
 
 function RequestSymbol() {
   return <span className={styles.require}>*</span>;
@@ -95,13 +96,22 @@ export default function CreateNFT() {
     formData.append("name", nameInput);
     formData.append("description", descriptionInput);
 
-    //fake
-    formData.append("token", "asdfaserfasdf");
+    // deploye erc721
+    const erc721Factory = new ethers.ContractFactory(
+      ERC721Land.abi,
+      ERC721Land.bytecode,
+      currentSigner
+    );
+    const contract = await erc721Factory.deploy(
+      nameInput,
+      "",
+      contractAddresses.transferProxy
+    );
+    await contract.deployed();
+    formData.append("token", contract.address);
 
-    setTimeout(async () => {
-      setCreateResult(await sendData(formData));
-      console.log(formData);
-    }, 5000);
+    setCreateResult(await sendData(formData));
+
     setSaveClass("save_disable");
   };
 

@@ -45,7 +45,6 @@ const user = {
 
 export default function Profile() {
   const me = useAppSelector((state) => state.wallet.walletInfo);
-  console.log(me);
   // indicator
   const [indicators, setIndicators] = useState([
     { title: "Collected", value: 1, isActive: true },

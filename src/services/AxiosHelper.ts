@@ -1,6 +1,9 @@
 // http.ts
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { url } from "inspector";
+import { walletConnector } from "../features/wallet/walletConnector";
+import { signAuth } from "../utils/signingAuth";
 
 enum StatusCode {
   Unauthorized = 401,
@@ -98,7 +101,7 @@ class Http {
 
   // Handle global app errors
   // We can handle generic app errors depending on the status code
-  private handleError(error: any) {
+  private async handleError(error: any) {
     const { status } = error;
     console.log("error code", status, error);
     switch (status) {
@@ -112,6 +115,16 @@ class Http {
       }
       case StatusCode.Unauthorized: {
         // Handle Unauthorized
+        const connector = await walletConnector();
+        const verifyMsg = await signAuth(connector?.signer!);
+        var res = await this.post<any>("/auth/verify", {
+          signature: verifyMsg.signature,
+          nonce: verifyMsg.nonce
+        });
+        if (res.status === 200) {
+          localStorage.setItem("accessToken", res.data.accessToken);
+        }
+
         break;
       }
       case StatusCode.TooManyRequests: {

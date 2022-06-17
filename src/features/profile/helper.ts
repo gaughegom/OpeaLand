@@ -31,12 +31,12 @@ export const sendData = async (form: FormData) => {
 
     const result = await http.put(UPDATE_WALLET, form, config);
     return {
-      status: "success",
+      type: "success",
       message: "Update info successfully!"
     };
   } catch (e: any) {
     return {
-      status: "error",
+      type: "error",
       message: e.data.message
     };
   }

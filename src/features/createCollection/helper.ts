@@ -1,14 +1,17 @@
+import { INSERT_COLLECTION } from "../../services/APIurls";
 import { http } from "../../services/AxiosHelper";
 
 export const sendData = async (form: FormData) => {
+  try {
     const config = {
-        headers: {
-            "content-type": "multipart/form-data",
-        },
+      headers: {
+        "content-type": "multipart/form-data"
+      }
     };
 
-    // const result =
-    //     //selectedAvt && (await axios.post(`http:/localhost:32/api/test`, formData, config));
-    //     await http.post(`http://localhost:32/api/users/test`, form, config);
-    return "success"
+    const result = await http.post(INSERT_COLLECTION, form, config);
+    return { type: "success", message: "Create collection successfully." };
+  } catch (e: any) {
+    return { type: "error", message: e.message };
+  }
 };

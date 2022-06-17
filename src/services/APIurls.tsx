@@ -6,3 +6,4 @@ export const ALL_ITEMS = domain + "/items";
 export const INSERT_ITEM = "/item";
 export const GET_WALLET = "/wallet";
 export const UPDATE_WALLET = "/wallet";
+export const INSERT_COLLECTION = "/collection";

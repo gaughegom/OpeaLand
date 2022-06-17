@@ -114,6 +114,7 @@ export default function Profile() {
 
     if (updateResult) {
       setIsLoading(false);
+      setUpdateResult(undefined);
       const notify = {
         id: Date.now().toString(),
         type: updateResult.type,

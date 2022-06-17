@@ -1,14 +1,24 @@
 import { http } from "../../services/AxiosHelper";
 
+import { INSERT_ITEM } from "../../services/APIurls";
+
 export const sendData = async (form: FormData) => {
+  try {
     const config = {
-        headers: {
-            "content-type": "multipart/form-data",
-        },
+      headers: {
+        "content-type": "multipart/form-data"
+      }
     };
 
-    // const result =
-    //     //selectedAvt && (await axios.post(`http:/localhost:32/api/test`, formData, config));
-    //     await http.post(`http://localhost:32/api/users/test`, form, config);
-    return "success"
+    const result = await http.post(INSERT_ITEM, form, config);
+    return {
+      status: "success",
+      message: "Create NFT successfully!"
+    };
+  } catch (e: any) {
+    return {
+      status: "error",
+      message: e.data.message
+    };
+  }
 };

@@ -1,5 +1,8 @@
 import { ethers } from "ethers";
 import { WalletProvider } from "./walletSlice";
+import { http } from "../../services/AxiosHelper";
+import { GET_WALLET } from "../../services/APIurls";
+import { IWalletModel } from "../../model/Wallet.model";
 
 export const walletConnector = async () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -17,7 +20,18 @@ export const walletConnector = async () => {
   const wallet: WalletProvider = {
     address,
     signer,
-    balance
+    balance,
+    walletInfo: {} as IWalletModel
   };
-  return wallet;
+
+  try {
+    const walletInfoApiResponse = await http.get<IWalletModel>(
+      `${GET_WALLET}/${wallet.address}`
+    );
+    wallet.walletInfo = walletInfoApiResponse.data;
+    console.log(wallet);
+    return wallet;
+  } catch (e: any) {
+    return undefined;
+  }
 };

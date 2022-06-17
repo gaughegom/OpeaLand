@@ -13,3 +13,7 @@ declare module "*.json" {
   const value: any;
   export default value;
 }
+
+declare module "uuid/v4" {
+  export { v4 as default } from "@types/uuid";
+}

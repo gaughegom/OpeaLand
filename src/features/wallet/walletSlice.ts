@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { BigNumber, ethers } from "ethers";
+import { IWalletModel } from "../../model/Wallet.model";
 import { RootState } from "../../redux/store";
 
 //Defining our initialState's type
@@ -7,6 +8,7 @@ export interface WalletProvider {
   address: string | undefined;
   signer: ethers.providers.JsonRpcSigner | undefined;
   balance: BigNumber | undefined;
+  walletInfo: IWalletModel | undefined;
 }
 
 export interface WalletUser extends WalletProvider {
@@ -17,7 +19,8 @@ export interface WalletUser extends WalletProvider {
 const initialState: WalletProvider = {
   address: undefined,
   signer: undefined,
-  balance: undefined
+  balance: undefined,
+  walletInfo: undefined
 };
 
 export const ethSlice = createSlice({
@@ -31,6 +34,7 @@ export const ethSlice = createSlice({
       state.signer = action.payload?.signer;
       state.address = action.payload?.address;
       state.balance = action.payload?.balance;
+      state.walletInfo = action.payload?.walletInfo;
     }
   }
 });

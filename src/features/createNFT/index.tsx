@@ -24,7 +24,7 @@ import formatAddress from "../../utils/formatAddress";
 import { sliceString } from "../../utils/strimString";
 import MenuItem from "@mui/material/MenuItem";
 import InputBase from "@mui/material/InputBase";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 // contract import
 import { contractAddresses } from "../../config";
@@ -287,10 +287,12 @@ export default function CreateNFT() {
         ExchangeAuction.abi,
         currentSigner
       );
-      const txList = await exchangeAuctionContract.list(
+      const txList = await exchangeAuctionContract.start(
         collectionInput,
         tokenId,
-        (endAtInput?.valueOf()! - Date.now()) / 1000,
+        BigNumber.from(
+          Math.floor((endAtInput?.valueOf()! - Date.now()) / 1000)
+        ),
         ethers.utils.parseEther(priceInput.toString())
       );
       const txListReceipt = await txList.wait();

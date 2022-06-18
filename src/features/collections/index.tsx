@@ -47,13 +47,15 @@ const mockAPIs: Props[] = [
 export default function () {
     const navigate = useNavigate();
 
-    var allCollections: ICollectionModel[] = [];
+    var allCollections = [];
 
     React.useEffect(() => {
         const fetchData = async() => {
-            const result = await http.get<any>(GET_ALL_COLLECTIONS)
-            console.log(result)
+            const result = await http.get<any>(GET_ALL_COLLECTIONS+"/all")
+            allCollections = result.data
         }
+
+        fetchData()
     })
 
     return (

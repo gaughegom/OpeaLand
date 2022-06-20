@@ -1,0 +1,13 @@
+.box {
+    padding: 20px;
+    display:flex;
+    flex-direction: row;
+    gap: 20px;
+    .chip {
+        border-radius: 10px;
+        padding:12px 8px;
+        height: auto;
+        font-weight: 600;
+        font-size: 16px;
+    }
+}

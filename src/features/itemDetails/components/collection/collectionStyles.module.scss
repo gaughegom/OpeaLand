@@ -1,0 +1,33 @@
+.box {
+    border-radius: 12px;
+    border: 1px solid #d9dfe1;
+    width: 100%;
+    overflow: hidden;
+
+    .header {
+        padding: 20px;
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        align-items: center;
+    }
+    .container {
+        width: 100%;
+        padding: 20px;
+        display: flex;
+        overflow: scroll;
+        .items {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 20px;
+            .item {
+                width: 300px;
+    
+                border-radius: 12px;
+                border: 1px solid #d9dfe1;
+    
+                overflow: hidden;
+            }
+        }
+    }
+}

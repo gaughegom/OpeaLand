@@ -1,0 +1,89 @@
+.box {
+    width: 600px;
+    gap: 40px;
+    padding: 20px;
+    .flex {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        .title {
+            width: 100%;
+            font-weight: 600;
+            font-size: 20px;
+            text-align: center;
+        }
+        .save {
+            padding: 12px 40px;
+            width: 100%;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            background-color: var(--primaryColor);
+            border-radius: 8px;
+            border-width: 0;
+            &:hover {
+                cursor: pointer;
+                opacity: 0.9;
+            }
+            &_disable {
+                @extend .save;
+                background-color: #868686;
+            }
+        }
+    }
+}
+.table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    .row {
+        display: flex;
+        flex-direction: row;
+        gap: 2px;
+        .remove {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            background-color: #a5a5a5;
+            &:hover {
+                cursor: pointer;
+                opacity: 0.9;
+            }
+        }
+        .type {
+            padding: 12px;
+            flex: 1;
+            border: 2px solid rgb(229 232 235);
+            border-radius: 4px;
+        }
+        .name {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgb(229 232 235);
+            border-radius: 4px;
+        }
+    }
+}
+.addbtn {
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgb(229 232 235);
+    border: 2px solid var(--primaryColor);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &:hover {
+        cursor: pointer;
+        opacity: 0.9;
+        box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.2);
+    }
+    .addIcon {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--primaryColor);
+    }
+}

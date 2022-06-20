@@ -1,0 +1,25 @@
+.box {
+    padding: 0 20px;
+    width: 360px;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    &:hover {
+        cursor: pointer;
+    }
+
+    .logo {
+        width: 40px;
+        height: 40px;
+        background-image: url(https://opensea.io/static/images/logos/opensea.svg);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .name {
+        padding: 0 10px;
+        font-weight: bold;
+        font-size: 22px;
+    }
+}

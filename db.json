@@ -1,0 +1,72 @@
+[
+    {
+      "token": "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
+      "tokenId": "tokenId 1",
+      "price": "12000000000000000000",
+      "creator": "0x473555075d70a736788dcfcd7ca2901870cc575e",
+      "owner": "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
+      "ipfsUrl": "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
+      "status": "status 1",
+      "thumbLink": "http://loremflickr.com/640/480/abstract",
+      "collectionName": "Emerson",
+      "name": "Amos Daugherty",
+      "endAt": "2083-06-25T15:24:21.037Z",
+      "id": "1"
+    },
+    {
+      "token": "0xf356ee7ab66783a71ea6bbc86ccad6fe01148e70",
+      "tokenId": "tokenId 2",
+      "price": "13000000000000000000",
+      "creator": "0x5090a9974569d537793d8ebf0e58f6ef5dccd1bc",
+      "owner": "0xbf9afdb8fbcffb521e13cfbfc922ccecf4acf4fd",
+      "ipfsUrl": "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/2",
+      "status": "status 2",
+      "thumbLink": "http://loremflickr.com/640/480/abstract",
+      "collectionName": "Jordan",
+      "name": "Leticia Dare",
+      "endAt": "2078-08-08T04:20:02.771Z",
+      "id": "2"
+    },
+    {
+      "token": "0x2645eaa3acd49bd0bdf7c3ed9bd89838b9c59b6b",
+      "tokenId": "tokenId 3",
+      "price": "14000000000000000000",
+      "creator": "0xed78dd87acd80d627fae625fec5b1b4c42fabf5e",
+      "owner": "0x5cb45bf21eeb7966b4b3045fd47620dce50e4452",
+      "ipfsUrl": "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/3",
+      "status": "status 3",
+      "thumbLink": "http://loremflickr.com/640/480/city",
+      "collectionName": "Brooklyn",
+      "name": "Javier Daugherty II",
+      "endAt": "1992-10-02T23:44:43.714Z",
+      "id": "3"
+    },
+    {
+      "token": "0xa6ebbfdbafabeef6bf6aa70d5206c3e51f91b163",
+      "tokenId": "tokenId 4",
+      "price": "16000000000000000000",
+      "creator": "0x5fe54cca7aae1fb1bfe0558fb77fa68d1a64ce33",
+      "owner": "0x5b4fd9af1bcdc30b1b11f9a729c4a61df1adabdd",
+      "ipfsUrl": "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/4",
+      "status": "status 4",
+      "thumbLink": "http://loremflickr.com/640/480/technics",
+      "collectionName": "Greer",
+      "name": "Lowell Spencer",
+      "endAt": "2032-06-05T04:44:15.655Z",
+      "id": "4"
+    },
+    {
+      "token": "0x77ff55fb184bdb215f48ffddeacf890ccccc2a93",
+      "tokenId": "tokenId 5",
+      "price": "12000000000000000000",
+      "creator": "0x9fbaa6f00a82377e056b85a6ae31bfebfbc91e2e",
+      "owner": "0xebff35b6142ed6effa8fdeb430fcfcd61b6db6cb",
+      "ipfsUrl": "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/5",
+      "status": "status 5",
+      "thumbLink": "http://loremflickr.com/640/480/fashion",
+      "collectionName": "Noah",
+      "name": "Jay Will",
+      "endAt": "2083-05-18T08:19:52.710Z",
+      "id": "5"
+    }
+  ]

@@ -1,0 +1,360 @@
+.banner {
+    height: 320px;
+    position: relative;
+    .bannerChild {
+        position: relative;
+        background-color: rgb(219, 219, 219);
+
+        background-size: cover;
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        .hover {
+            cursor: pointer;
+            .layout {
+                display: block;
+            }
+            .editIcon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+        .layout {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            opacity: 0.1;
+        }
+        .editIcon {
+            display: none;
+            width: 40px;
+            height: 40px;
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+    .avt {
+        position: absolute;
+        left: 40px;
+        bottom: 0px;
+
+        transform: translate(0, 30%);
+
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.2);
+
+        background-color: rgb(219, 219, 219);
+        overflow: hidden;
+
+        .hover {
+            cursor: pointer;
+            .layout {
+                display: block;
+            }
+            .editIcon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+        .layout {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            opacity: 0.1;
+        }
+        .editIcon {
+            display: none;
+            width: 40px;
+            height: 40px;
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+}
+.grid {
+    padding: 80px 40px;
+    width: 100%;
+    .info {
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        .name {
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .address {
+            font-weight: 500;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            width: fit-content;
+            padding: 8px;
+            border: 1px solid #d9dfe1;
+            border-radius: 4px;
+            background-color: #7facd9;
+            &:hover {
+                cursor: pointer;
+            }
+        }
+        .joined {
+            color: rgb(112 122 131);
+        }
+    }
+    .tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        .indicators {
+            width: 100%;
+            height: 50px;
+
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: center;
+            .indicator {
+                font-size: 18px;
+                font-weight: 600;
+                height: 100%;
+                padding: auto;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                color: rgb(112 122 131);
+                &:hover {
+                    cursor: pointer;
+                }
+                &_active {
+                    @extend .indicator;
+                    border-bottom: 2px solid black;
+                    color: black;
+                }
+            }
+        }
+        .container {
+            width: 100%;
+        }
+        .profileSetting {
+            display: flex;
+            flex-direction: row;
+            gap: 80px;
+            justify-content: center;
+            .left {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+                .form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 24px;
+                    width: 400px;
+                    .field {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        .label {
+                            font-weight: 600;
+                        }
+                        .input {
+                            width: 100%;
+                            padding: 12px;
+                            border-radius: 12px;
+                            border: 1px solid rgb(229 232 235);
+                            font-size: 14px;
+                            resize: vertical;
+                            &_invalid {
+                                @extend .input;
+                                border: 2px solid red;
+                            }
+                        }
+                        .helperText {
+                            font-size: 14px;
+                            color: red;
+                        }
+                    }
+                }
+                .save {
+                    padding: 12px 40px;
+                    color: white;
+                    width: fit-content;
+                    font-weight: 600;
+                    background-color: var(--primaryColor);
+                    border-radius: 12px;
+                    &:hover {
+                        cursor: pointer;
+                        opacity: 0.9;
+                    }
+                    &_disable {
+                        @extend .save;
+                        background-color: #868686;
+                    }
+                }
+            }
+            .right {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+                .form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 24px;
+                    .field {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        .label {
+                            font-weight: 600;
+                        }
+                        .avt {
+                            position: relative;
+                            width: 160px;
+                            height: 160px;
+                            border-radius: 50%;
+                            overflow: hidden;
+                            background-size: cover;
+                            object-fit: cover;
+                            background-position: center;
+                            background-color: rgb(219, 219, 219);
+
+                            &:hover {
+                                cursor: pointer;
+                                .layout {
+                                    display: block;
+                                }
+                                .editIcon {
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                }
+                            }
+                            .layout {
+                                display: none;
+                                width: 100%;
+                                height: 100%;
+                                background-color: black;
+                                opacity: 0.1;
+                            }
+                            .editIcon {
+                                display: none;
+                                width: 40px;
+                                height: 40px;
+
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                            }
+                            .loadFile {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                opacity: 0;
+                            }
+                        }
+                        .banner {
+                            position: relative;
+                            width: 160px;
+                            height: 100px;
+                            border-radius: 12px;
+                            background-color: rgb(219, 219, 219);
+                            overflow: hidden;
+                            background-size: cover;
+                            object-fit: cover;
+                            background-position: center;
+                            &:hover {
+                                cursor: pointer;
+                                .layout {
+                                    display: block;
+                                }
+                                .editIcon {
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                }
+                            }
+                            .layout {
+                                display: none;
+                                width: 100%;
+                                height: 100%;
+                                background-color: black;
+                                opacity: 0.1;
+                            }
+                            .editIcon {
+                                display: none;
+                                width: 40px;
+                                height: 40px;
+
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                            }
+                            .loadFile {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                opacity: 0;
+                            }
+                        }
+                    }
+                }
+                .remove {
+                    padding: 12px 40px;
+                    color: white;
+                    width: fit-content;
+                    font-weight: 600;
+                    background-color: var(--primaryColor);
+                    border-radius: 12px;
+                    &:hover {
+                        cursor: pointer;
+                        opacity: 0.9;
+                    }
+                }
+            }
+        }
+    }
+}
+.noItem {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.notification {
+    z-index: 5;
+    position: fixed;
+    bottom: 60px;
+    right: 60px;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    background-color: rgb(10, 2, 44);
+    color: white;
+    overflow: hidden;
+    .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

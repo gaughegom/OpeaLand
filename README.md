@@ -8,8 +8,36 @@ Try running some of the following tasks:
 npx hardhat accounts
 npx hardhat compile
 npx hardhat clean
-npx hardhat test
+npx hardhat test --network hardhat
 npx hardhat node
 node scripts/sample-script.js
 npx hardhat help
 ```
+
+# Test localhost
+
+Run localhost chain
+
+```
+npx hardhat node
+```
+
+Run deploy task
+
+```
+npx hardhat deploy-local --network localhost
+```
+
+After deploy contracts at localhost successfully, copy and paste addresses on console to /src/config/contractAddresses.ts
+
+# Server backend
+
+Repo: https://github.com/hungw7/openland-server
+
+# Report
+
+- Link báo cáo: https://uithcm-my.sharepoint.com/:b:/g/personal/19521574_ms_uit_edu_vn/EcDqxRjhMftEtg-4N91GOY0BskAE6-LXNCJXBtfb763SqA?e=nIfjlX
+
+- Thành viên:
+  - Nguyễn Thanh Hưng (19521574)
+  - Phạm Nguyễn Minh Thắng (19522216)

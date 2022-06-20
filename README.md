@@ -29,3 +29,11 @@ npx hardhat deploy-local --network localhost
 ```
 
 After deploy contracts at localhost successfully, copy and paste addresses on console to /src/config/contractAddresses.ts
+
+# Report
+
+Link báo cáo: https://uithcm-my.sharepoint.com/:b:/g/personal/19521574_ms_uit_edu_vn/EcDqxRjhMftEtg-4N91GOY0BskAE6-LXNCJXBtfb763SqA?e=nIfjlX
+
+- Thành viên:
+  - Nguyễn Thanh Hưng (19521574)
+  - Phạm Nguyễn Minh Thắng (19522216)

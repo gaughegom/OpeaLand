@@ -1,4 +1,7 @@
-export function sliceString(input: string, numberOfLetter: number) {
+export function sliceString(input: string | undefined, numberOfLetter: number) {
+    if (!input) {
+        return "No description";
+    }
     if (input.length <= numberOfLetter) {
         return input;
     }

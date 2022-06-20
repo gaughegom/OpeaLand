@@ -1,9 +1,10 @@
 export interface ICollectionModel {
-    token: string,
-    name: string,
-    symbol: string,
-    amount: number,
-    creator: string,
-    bannerUrl: string,
-    logoUrl: string,
+    token: string;
+    name: string;
+    creator: string;
+    logoUrl: string;
+    bannerUrl: string;
+    amount: number;
+    description?: string;
+    creatorDisplayName: string;
 }

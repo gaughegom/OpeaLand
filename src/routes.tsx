@@ -35,7 +35,7 @@ const publicRoute: routeType[] = [
         element: <Collections />,
     },
     {
-        path: COLLECTION_PATH + "/:id",
+        path: COLLECTION_PATH + "/:token",
         element: <Collection />,
     },
     {

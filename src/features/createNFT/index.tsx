@@ -50,7 +50,8 @@ export default function CreateNFT() {
     amount: 0,
     creator: "",
     bannerUrl: "",
-    logoUrl: ""
+    logoUrl: "",
+    creatorDisplayName: "",
   };
   const dispatch = useAppDispatch();
   const me = useAppSelector((state) => state.wallet);

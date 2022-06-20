@@ -1,15 +1,11 @@
 export interface IItemMetadataModel {
-  imageUrl: string;
+  thumbLink: string;
   description: string;
   name: string;
-  // attributes: [{
-  //     trait: string,
-  //     value: string,
-  // }],
   properties: {
     type: string;
     name: string;
-  };
+  }[];
 }
 
 export interface IItemModel {
@@ -23,7 +19,7 @@ export interface IItemModel {
   owner: string; // seller address
   ownerDisplay: string;
   ipfsUrl: string;
-  metadata: IItemMetadataModel;
+  metadata?: IItemMetadataModel;
   status: string;
   endAt: string;
 }

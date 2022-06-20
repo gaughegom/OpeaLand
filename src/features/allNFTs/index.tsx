@@ -17,15 +17,50 @@ import { IItemModel, IItemMetadataModel } from "../../model/Item.model";
 
 import { http } from "../../services/AxiosHelper";
 
-export type itemType = {
-    thumbLink: string;
-    id: string;
-    collection: string;
-    name: string;
-    author: string;
-    isFavorite: boolean;
-    price: string;
-};
+const mockAPIsItem: IItemModel[] = [
+    {
+        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
+        tokenId: "1",
+        price: "12000000000000000000",
+        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
+        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
+        ownerDisplay: "Joner",
+        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
+        status: "Sell",
+        thumbLink: "http://loremflickr.com/640/480/abstract",
+        collectionName: "Emerson",
+        name: "Amos Daugherty",
+        endAt: "2083-06-25T15:24:21.037Z",
+    },
+    {
+        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
+        tokenId: "2",
+        price: "12000000000000000000",
+        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
+        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
+        ownerDisplay: "Gausts",
+        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
+        status: "Sell",
+        thumbLink: "http://loremflickr.com/640/480/abstract",
+        collectionName: "Emerson",
+        name: "Amos Daugherty",
+        endAt: "2083-06-25T15:24:21.037Z",
+    },
+    {
+        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
+        tokenId: "3",
+        price: "12000000000000000000",
+        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
+        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
+        ownerDisplay: "Baed",
+        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
+        status: "Sell",
+        thumbLink: "http://loremflickr.com/640/480/abstract",
+        collectionName: "Emerson",
+        name: "Amos Daugherty",
+        endAt: "2083-06-25T15:24:21.037Z",
+    },
+];
 
 export default function AllNFTsPage() {
     const open = useAppSelector((state) => state.allNFTs.open);
@@ -34,17 +69,17 @@ export default function AllNFTsPage() {
     );
 
     //-- real data
-    const [apiItems, setApiItems] = useState<IItemModel[]>([])
-    useEffect(() => {
-        const fetchData = async () => {
-            const newItems: IItemModel[] = (
-                await http.get<IItemModel[]>(ALL_ITEMS)
-            ).data;
-            setApiItems(newItems)
-        };
+    // const [apiItems, setApiItems] = useState<IItemModel[]>([]);
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         const newItems: IItemModel[] = (
+    //             await http.get<IItemModel[]>(ALL_ITEMS)
+    //         ).data;
+    //         setApiItems(newItems);
+    //     };
 
-        fetchData();
-    }, []);
+    //     fetchData();
+    // }, []);
     //----
 
     return (
@@ -67,8 +102,8 @@ export default function AllNFTsPage() {
                                 columnSpacing={2}
                                 className={styles.boxItem}
                             >
-                                {apiItems !== [] &&
-                                    apiItems.map((item) => (
+                                {mockAPIsItem !== [] &&
+                                    mockAPIsItem.map((item) => (
                                         <Grid
                                             item
                                             md={open ? 4 : 3}

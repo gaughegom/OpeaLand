@@ -9,6 +9,7 @@ export const GET_IPFS = "/item/ipfs";
 export const INSERT_ITEM = "/item";
 export const UPDATE_ITEM_OWNER = "/item/owner";
 export const UPDATE_ITEM_STATUS = "/item/status";
+export const UPDATE_ITEM_PRICE = "/item/price";
 export const GET_WALLET = "/wallet";
 export const UPDATE_WALLET = "/wallet";
 export const INSERT_COLLECTION = "/collection";

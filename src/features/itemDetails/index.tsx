@@ -22,7 +22,7 @@ import {
     ALL_ITEMS,
     GET_IPFS,
     GET_ITEM_BY_TOKEN,
-    GET_ITEM_BY_TOKENID,
+    GET_ITEM_BY_TOKENID
 } from "../../services/APIurls";
 import formatAddress from "../../utils/formatAddress";
 import SvgEthIcon from "../svg/svgEthIcon";
@@ -35,7 +35,7 @@ import { useAppSelector } from "../../hooks";
 const ITEM_STATUS = {
     BID: 2,
     SALE: 1,
-    NULL: 0,
+    NULL: 0
 };
 const mockItemMetadata: IItemMetadataModel = {
     thumbLink:
@@ -46,13 +46,13 @@ const mockItemMetadata: IItemMetadataModel = {
     properties: [
         {
             type: "Jail",
-            name: "Hepedy",
+            name: "Hepedy"
         },
         {
             type: "Wegger",
-            name: "Laige",
-        },
-    ],
+            name: "Laige"
+        }
+    ]
 };
 // const item: IItemModel = {
 //     token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
@@ -123,9 +123,7 @@ export default function Item() {
             const cid = splitedIpfs[2];
 
             const metadata: IItemMetadataModel = (
-                await http.get<IItemMetadataModel>(
-                    GET_IPFS + `/${cid}`
-                )
+                await http.get<IItemMetadataModel>(GET_IPFS + `/${cid}`)
             ).data;
 
             if (metadata) {
@@ -222,7 +220,7 @@ export default function Item() {
                                 <div
                                     style={{
                                         fontSize: 16,
-                                        fontWeight: "normal",
+                                        fontWeight: "normal"
                                     }}
                                 >
                                     {item?.status === ITEM_STATUS.SALE
@@ -239,7 +237,7 @@ export default function Item() {
                                             style={{
                                                 marginRight: "8px",
                                                 width: "16px",
-                                                height: "16px",
+                                                height: "16px"
                                             }}
                                         />
                                     </span>
@@ -403,6 +401,7 @@ export default function Item() {
                     open={openResell}
                     setOpen={setOpenResell}
                     handleClose={handleCloseResell}
+                    item={item}
                 ></Resell>
             )}
             {item && (

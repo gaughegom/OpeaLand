@@ -22,7 +22,8 @@ import {
     ALL_ITEMS,
     GET_IPFS,
     GET_ITEM_BY_TOKEN,
-    GET_ITEM_BY_TOKENID
+    GET_ITEM_BY_TOKENID,
+    UPDATE_ITEM_STATUS
 } from "../../services/APIurls";
 import formatAddress from "../../utils/formatAddress";
 import SvgEthIcon from "../svg/svgEthIcon";
@@ -31,6 +32,10 @@ import ListIcon from "@mui/icons-material/List";
 import { sliceString } from "../../utils/strimString";
 import { COLLECTION_PATH } from "../../routes";
 import { useAppSelector } from "../../hooks";
+
+import ExchangeSell from "../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json";
+
+import { contractAddresses } from "../../config";
 
 const ITEM_STATUS = {
     BID: 2,
@@ -100,8 +105,31 @@ export default function Item() {
     const handleOpenAuction = () => setOpenAuction(true);
     const handleCloseAuction = () => setOpenAuction(false);
 
-    const handleCancel = () => {
+    const currentSigner = useAppSelector((state) => state.wallet.signer);
+    const currentAddress = useAppSelector((state) => state.wallet.address);
+
+    const handleCancel = async () => {
         setIsCancel(true);
+        // call cancel func in contract
+
+        var exchangeSellContract = new ethers.Contract(
+            contractAddresses.exchangeSell,
+            ExchangeSell.abi,
+            currentSigner
+        );
+        const txDelist = await exchangeSellContract.delist(
+            item?.token,
+            item?.tokenId
+        );
+        const txDelistReceipt = await txDelist.wait();
+
+        // call api
+        const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
+            token: item?.token,
+            tokenId: item?.tokenId,
+            status: 0
+        });
+        console.log(resUpdateStatus);
     };
 
     useEffect(() => {
@@ -137,7 +165,7 @@ export default function Item() {
     useEffect(() => {
         if (item) {
             setIsOwner(me?.address === item.owner);
-            setIsCancel(item.status === 0)
+            setIsCancel(item.status === 0);
         }
     }, [item]);
 

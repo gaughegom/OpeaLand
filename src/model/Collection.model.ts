@@ -4,7 +4,7 @@ export interface ICollectionModel {
     creator: string;
     logoUrl: string;
     bannerUrl: string;
-    amount: number;
+    amount?: number;
     description?: string;
     creatorDisplayName: string;
 }

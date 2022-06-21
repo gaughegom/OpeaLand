@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 import moment from "moment";
 
@@ -12,11 +11,8 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import CardItem from "../allNFTs/components/cardItem";
 
-import { ALL_ITEMS } from "../../services/APIurls";
 import { CREATE_COLLECTION_PATH } from "../../routes";
 import Grid from "@mui/material/Grid";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
 
 import CardItemCollection from "../collections/components/cardCollection";
 
@@ -54,7 +50,7 @@ const mockAPIsItem: IItemModel[] = [
         owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
         ownerDisplay: "Joner",
         ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: "Sell",
+        status: 1,
         thumbLink: "http://loremflickr.com/640/480/abstract",
         collectionName: "Emerson",
         name: "Amos Daugherty",
@@ -68,7 +64,7 @@ const mockAPIsItem: IItemModel[] = [
         owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
         ownerDisplay: "Gausts",
         ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: "Sell",
+        status: 1,
         thumbLink: "http://loremflickr.com/640/480/abstract",
         collectionName: "Emerson",
         name: "Amos Daugherty",
@@ -82,7 +78,7 @@ const mockAPIsItem: IItemModel[] = [
         owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
         ownerDisplay: "Baed",
         ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: "Sell",
+        status: 1,
         thumbLink: "http://loremflickr.com/640/480/abstract",
         collectionName: "Emerson",
         name: "Amos Daugherty",
@@ -296,7 +292,7 @@ export default function Profile() {
         if (selectedAvt) formData.append("fileAvt", selectedAvt);
         if (selectedBanner) formData.append("fileBanner", selectedBanner);
 
-        setSaveClass("save_disable");
+        setSaveClass("_disable");
         setIsLoading(true);
         setUpdateResult(await sendData(formData));
     };
@@ -337,14 +333,12 @@ export default function Profile() {
                 {/* header */}
                 <div className={styles.info}>
                     <div className={styles.name}>
-                        {mockAPIWallet?.displayName || "Unamed"}
+                        {me?.displayName || "Unamed"}
                     </div>
                     <div
                         className={styles.address}
                         onClick={() => {
-                            navigator.clipboard.writeText(
-                                mockAPIWallet?.address!
-                            );
+                            navigator.clipboard.writeText(me?.address!);
                             const notify = {
                                 id: Date.now().toString(),
                                 type: "success",
@@ -353,7 +347,7 @@ export default function Profile() {
                             dispatch(pushNotify(notify));
                         }}
                     >
-                        <div>{formatAddress(mockAPIWallet?.address!)}</div>
+                        <div>{formatAddress(me?.address!)}</div>
                         <ContentCopyIcon
                             sx={{ fontSize: 20 }}
                         ></ContentCopyIcon>
@@ -400,10 +394,17 @@ export default function Profile() {
                                                         token={item.token}
                                                         tokenId={item.tokenId}
                                                         name={item.name}
-                                                        collection={
+                                                        collectionName={
                                                             item.collectionName
                                                         }
                                                         price={item.price}
+                                                        owner={item.owner}
+                                                        ownerDisplay={
+                                                            item.ownerDisplay
+                                                        }
+                                                        ipfsUrl={item.ipfsUrl}
+                                                        status={item.status}
+                                                        endAt={item.endAt}
                                                     ></CardItem>
                                                 </Grid>
                                             ))}

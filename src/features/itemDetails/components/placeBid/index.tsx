@@ -79,6 +79,7 @@ export default function PlaceBid({
     };
 
     const handlePlaceBidClick = () => {
+        setPrice(bid)
         setOpen(false);
     };
 
@@ -99,6 +100,7 @@ export default function PlaceBid({
                                 id="bid"
                                 value={bid}
                                 onChange={handleBidChange}
+                                min={+minBid}
                                 className={styles.input}
                             ></input>
                             <span>

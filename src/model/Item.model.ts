@@ -20,6 +20,6 @@ export interface IItemModel {
   ownerDisplay: string;
   ipfsUrl: string;
   metadata?: IItemMetadataModel;
-  status: string;
-  endAt: string;
+  status: number;
+  endAt?: string;
 }

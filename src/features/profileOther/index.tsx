@@ -16,8 +16,7 @@ import Grid from "@mui/material/Grid";
 
 import { validateEmail, validateUserName } from "./helper";
 
-import {IItemModel} from '../../model/Item.model'
-
+import { IItemModel } from "../../model/Item.model";
 
 const user = {
     name: "John",
@@ -75,13 +74,11 @@ export default function Profile() {
                 <div
                     className={styles.bannerChild}
                     style={{ backgroundImage: `url(${user.cover})` }}
-                >
-                </div>
+                ></div>
                 <div
                     className={styles.avt}
                     style={{ backgroundImage: `url(${user.avt})` }}
-                >
-                </div>
+                ></div>
             </div>
             {/* grid */}
             <div className={styles.grid}>
@@ -136,7 +133,7 @@ export default function Profile() {
                                             columnSpacing={2}
                                             className={styles.boxItem}
                                         >
-                                            {items.map((item,idx) => (
+                                            {items.map((item, idx) => (
                                                 <Grid item md={3} key={idx}>
                                                     <CardItem
                                                         thumbLink={
@@ -145,10 +142,17 @@ export default function Profile() {
                                                         token={item.token}
                                                         tokenId={item.tokenId}
                                                         name={item.name}
-                                                        collection={
+                                                        collectionName={
                                                             item.collectionName
                                                         }
                                                         price={item.price}
+                                                        owner={item.owner}
+                                                        ownerDisplay={
+                                                            item.ownerDisplay
+                                                        }
+                                                        ipfsUrl={item.ipfsUrl}
+                                                        status={item.status}
+                                                        endAt={item.endAt}
                                                     ></CardItem>
                                                 </Grid>
                                             ))}

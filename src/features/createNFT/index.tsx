@@ -88,7 +88,7 @@ export default function CreateNFT() {
   React.useEffect(() => {
     const fetchCollection = async () => {
       try {
-        const result = await http.get<any>(
+        const result = await http.get<ICollectionModel[]>(
           `${GET_COLLECTION_BY_OWNER}/${me?.address}`
         );
         setMyCollections([defaultCollection, ...result.data]);

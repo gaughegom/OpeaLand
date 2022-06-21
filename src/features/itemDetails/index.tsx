@@ -129,12 +129,17 @@ export default function Item() {
             if (metadata) {
                 setItem({ metadata, ...newItem });
             }
-
-            setIsOwner(me?.address === newItem.creator);
         };
 
         fetchData();
     }, [params]);
+
+    useEffect(() => {
+        if (item) {
+            setIsOwner(me?.address === item.owner);
+            setIsCancel(item.status === 0)
+        }
+    }, [item]);
 
     return (
         <div className={styles.page}>
@@ -225,7 +230,9 @@ export default function Item() {
                                 >
                                     {item?.status === ITEM_STATUS.SALE
                                         ? "Current price"
-                                        : "Minimum bid"}
+                                        : item?.status === ITEM_STATUS.BID
+                                        ? "Minimum bid"
+                                        : "Unsell"}
                                 </div>
                                 <div>
                                     {item &&

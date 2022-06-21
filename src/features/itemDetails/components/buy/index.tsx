@@ -14,6 +14,12 @@ import { ethers } from "ethers";
 
 import { COLLECTION_PATH } from "../../../../routes";
 
+import { contractAddresses } from "../../../../config";
+
+import ExchangeSell from "../../../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json";
+import Exchange from "../../../../abi/contracts/exchange/Exchange.sol/Exchange.json";
+import { useAppSelector } from "../../../../hooks";
+
 const BpIcon = styled("span")(({ theme }) => ({
     borderRadius: 5,
     width: 24,
@@ -28,15 +34,15 @@ const BpIcon = styled("span")(({ theme }) => ({
             : "linear-gradient(180deg,hsla(0,0%,100%,.8),hsla(0,0%,100%,0))",
     ".Mui-focusVisible &": {
         outline: "2px auto rgba(19,124,189,.6)",
-        outlineOffset: 2,
+        outlineOffset: 2
     },
     "input:disabled ~ &": {
         boxShadow: "none",
         background:
             theme.palette.mode === "dark"
                 ? "rgba(57,75,89,.5)"
-                : "rgba(206,217,224,.5)",
-    },
+                : "rgba(206,217,224,.5)"
+    }
 }));
 
 const BpCheckedIcon = styled(BpIcon)({
@@ -51,11 +57,11 @@ const BpCheckedIcon = styled(BpIcon)({
             "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
             " fill-rule='evenodd' clip-rule='evenodd' d='M12 5c-.28 0-.53.11-.71.29L7 9.59l-2.29-2.3a1.003 " +
             "1.003 0 00-1.42 1.42l3 3c.18.18.43.29.71.29s.53-.11.71-.29l5-5A1.003 1.003 0 0012 5z' fill='%23fff'/%3E%3C/svg%3E\")",
-        content: '""',
+        content: '""'
     },
     "input:hover ~ &": {
-        backgroundColor: "#106ba3",
-    },
+        backgroundColor: "#106ba3"
+    }
 });
 export default function Buy({ open, setOpen, handleClose, item }: any) {
     const navigate = useNavigate();
@@ -76,8 +82,29 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
         setIsChecked(!isChecked);
     };
 
-    const handleCheckoutClick = () => {
+    const currentSigner = useAppSelector((state) => state.wallet.signer);
+
+    const handleCheckoutClick = async () => {
         setOpen(false);
+
+        // call contract
+        const token = item.token;
+        const tokenId = item.tokenId;
+
+        const exchangeContract = new ethers.Contract(
+            contractAddresses.exchange,
+            Exchange.abi,
+            currentSigner
+        );
+        const txBuy = await exchangeContract.bid(token, tokenId, {
+            value: item.price
+        });
+        console.log(currentSigner?._address);
+        console.log(txBuy);
+
+        const txBuyReceipt = await txBuy.wait();
+
+        console.log(txBuyReceipt);
     };
 
     return (
@@ -96,7 +123,7 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
                             <div
                                 className={styles.img}
                                 style={{
-                                    backgroundImage: `url(${item?.thumbLink})`,
+                                    backgroundImage: `url(${item?.thumbLink})`
                                 }}
                             ></div>
                             <div className={styles.info}>
@@ -117,7 +144,7 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
                                         style={{
                                             marginRight: "8px",
                                             width: "16px",
-                                            height: "16px",
+                                            height: "16px"
                                         }}
                                     />
                                 </span>
@@ -133,7 +160,7 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
                                         style={{
                                             marginRight: "8px",
                                             width: "16px",
-                                            height: "16px",
+                                            height: "16px"
                                         }}
                                     />
                                 </span>
@@ -147,7 +174,7 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
                             checked={isChecked}
                             onChange={handleCheck}
                             sx={{
-                                "&:hover": { bgcolor: "transparent" },
+                                "&:hover": { bgcolor: "transparent" }
                             }}
                             checkedIcon={<BpCheckedIcon />}
                             icon={<BpIcon />}

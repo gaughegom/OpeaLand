@@ -4,6 +4,7 @@ const SERVER_API = "http://localhost:5000/api";
 export const ALL_ITEMS = "/item";
 export const GET_ITEM_BY_TOKEN = "/item/token";
 export const GET_ITEM_BY_TOKENID = "/item/detail"
+export const GET_IPFS = "/item/ipfs"
 
 
 export const INSERT_ITEM = "/item";

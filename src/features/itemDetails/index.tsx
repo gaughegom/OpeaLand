@@ -20,6 +20,7 @@ import { IItemModel, IItemMetadataModel } from "../../model/Item.model";
 import { http } from "../../services/AxiosHelper";
 import {
     ALL_ITEMS,
+    GET_IPFS,
     GET_ITEM_BY_TOKEN,
     GET_ITEM_BY_TOKENID,
 } from "../../services/APIurls";
@@ -117,6 +118,20 @@ export default function Item() {
             //     newItem.metadata = newMetaData;
             // }
             setItem(newItem);
+
+            const splitedIpfs = newItem.ipfsUrl?.split("/");
+            const cid = splitedIpfs[2];
+
+            const metadata: IItemMetadataModel = (
+                await http.get<IItemMetadataModel>(
+                    GET_IPFS + `/${cid}`
+                )
+            ).data;
+
+            if (metadata) {
+                setItem({ metadata, ...newItem });
+            }
+
             setIsOwner(me?.address === newItem.creator);
         };
 
@@ -192,7 +207,7 @@ export default function Item() {
                     {isOwner && isCancel && (
                         <p className={styles["author"]}>Item is canceled</p>
                     )}
-                    
+
                     <div className={styles["box-buynow"]}>
                         {item?.status !== ITEM_STATUS.NULL && (
                             <React.Fragment>
@@ -234,7 +249,11 @@ export default function Item() {
                             {!isOwner && (
                                 <div
                                     className={styles.button}
-                                    onClick={item?.status === ITEM_STATUS.SALE ? handleOpenBuy : handleOpenPlaceBid}
+                                    onClick={
+                                        item?.status === ITEM_STATUS.SALE
+                                            ? handleOpenBuy
+                                            : handleOpenPlaceBid
+                                    }
                                 >
                                     <AccountBalanceWalletIcon
                                         sx={{ fontSize: 28 }}
@@ -261,7 +280,7 @@ export default function Item() {
                             )}
                         </div>
                     </div>
-                    
+
                     {isOwner && isCancel && (
                         <div className={styles.box_sell_bid}>
                             <div

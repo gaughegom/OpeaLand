@@ -11,6 +11,8 @@ contract Exchange {
 	ExchangeSell excSell;
 	Holder holder;
 
+    event Bid(address token, uint256 tokenId, ExchangeState.AssetType assetType);
+
 	constructor(address _auct, address _sell, address _holder) {
 		excAuct = ExchangeAuction(payable(_auct));
 		excSell = ExchangeSell(payable(_sell));
@@ -28,5 +30,7 @@ contract Exchange {
 		} else {
 			excAuct.bid{value: msg.value}(assetKey);
 		}
+
+        emit Bid(token, tokenId, actionType);
 	}
 }

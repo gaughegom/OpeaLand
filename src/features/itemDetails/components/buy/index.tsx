@@ -12,6 +12,12 @@ import { IItemModel } from "../../../../model/Item.model";
 import Divider from "@mui/material/Divider";
 import { ethers } from "ethers";
 
+import { http } from "../../../../services/AxiosHelper";
+import {
+    UPDATE_ITEM_OWNER,
+    UPDATE_ITEM_STATUS
+} from "../../../../services/APIurls";
+
 import { COLLECTION_PATH } from "../../../../routes";
 
 import { contractAddresses } from "../../../../config";
@@ -83,6 +89,7 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
     };
 
     const currentSigner = useAppSelector((state) => state.wallet.signer);
+    const currentAddress = useAppSelector((state) => state.wallet.address);
 
     const handleCheckoutClick = async () => {
         setOpen(false);
@@ -99,12 +106,24 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
         const txBuy = await exchangeContract.bid(token, tokenId, {
             value: item.price
         });
-        console.log(currentSigner?._address);
-        console.log(txBuy);
-
         const txBuyReceipt = await txBuy.wait();
+        // update owner
+        const resUpdateOwner = await http.put(UPDATE_ITEM_OWNER, {
+            token,
+            tokenId,
+            owner: currentAddress
+        });
 
-        console.log(txBuyReceipt);
+        // update status
+        if (resUpdateOwner.status === 200) {
+            console.log("update owner success");
+            const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
+                token,
+                tokenId,
+                status: 0
+            });
+            console.log(resUpdateStatus);
+        }
     };
 
     return (

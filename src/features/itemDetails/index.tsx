@@ -211,7 +211,7 @@ export default function Item() {
                         <p className={styles["author"]}>Item is canceled</p>
                     )}
 
-                    <div className={styles["box-buynow"]}>
+                    { (isOwner || !isCancel) && <div className={styles["box-buynow"]}>
                         {item?.status !== ITEM_STATUS.NULL && (
                             <React.Fragment>
                                 <div className={styles.saleEnd}>
@@ -284,7 +284,7 @@ export default function Item() {
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div>}
 
                     {isOwner && isCancel && (
                         <div className={styles.box_sell_bid}>

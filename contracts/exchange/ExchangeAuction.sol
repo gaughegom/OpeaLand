@@ -150,6 +150,11 @@ contract ExchangeAuction is ExchangeCore {
 		_setHighestBid(auctionParam, bidValue);
 
 	}
+
+    function bidValueInAsset(bytes32 assetKey) external view returns(uint256) {
+        uint256 value = auctionsParam[assetKey].pendingReturns[_msgSender()];
+        return value;
+    }
 	
 	/**
 		@dev Allow bidder withdraw bid value by asset

@@ -10,8 +10,10 @@ import Checkbox, { CheckboxProps } from "@mui/material/Checkbox";
 import { contractAddresses } from "../../../../config";
 
 import Exchange from "../../../../abi/contracts/exchange/Exchange.sol/Exchange.json";
+import ExchangeAuction from "../../../../abi/contracts/exchange/ExchangeAuction.sol/ExchangeAuction.json";
+
 import { useAppSelector } from "../../../../hooks";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { http } from "../../../../services/AxiosHelper";
 import { UPDATE_ITEM_PRICE } from "../../../../services/APIurls";
 
@@ -97,24 +99,48 @@ export default function PlaceBid({
             Exchange.abi,
             currentSigner
         );
+        const exchangeAuctionContract = new ethers.Contract(
+            contractAddresses.exchangeAuction,
+            ExchangeAuction.abi,
+            currentSigner
+        );
 
         const token = item.token;
         const tokenId = item.tokenId;
 
-        console.log(await exchangeContract.auctionsParam);
-        const weiPrice = (parseFloat(bid) * 1e18).toString();
-        const txBid = await exchangeContract.bid(token, tokenId, {
-            value: weiPrice
-        });
-        console.log(txBid);
-        const txBidReceipt = await txBid.wait();
-        console.log(txBidReceipt);
+        const assetHashKey = ethers.utils.solidityKeccak256(
+            ["address", "uint256"],
+            [token, tokenId]
+        );
 
-        // call api update price
+        // get bidValue
+        const bidedValue = (
+            await exchangeAuctionContract.bidValueInAsset(assetHashKey)
+        ).toString();
+        console.log("bidedValue", bidedValue);
+
+        const weiPrice = (parseFloat(bid) * 1e18).toString();
+
+        const addValue = BigNumber.from(weiPrice).sub(
+            BigNumber.from(bidedValue)
+        );
+
+        console.log("addedValue", addValue.toString());
+        // call contract
+        const txBid = await exchangeContract.bid(token, tokenId, {
+            value: addValue
+        });
+        await txBid.wait();
+
+        // updateApi
+
+        const auctionParam = await exchangeAuctionContract.auctionsParam(
+            assetHashKey
+        );
         const resUpdatePrice = await http.put(UPDATE_ITEM_PRICE, {
             token,
             tokenId,
-            price: weiPrice
+            price: auctionParam.highestBid.toString()
         });
         console.log("call api", resUpdatePrice);
     };
@@ -129,6 +155,7 @@ export default function PlaceBid({
                         <label className={styles.label} htmlFor="bid">
                             Offer amount
                         </label>
+                        <p>We will auto calculate bid value before</p>
 
                         <div className={styles.input_box}>
                             <input

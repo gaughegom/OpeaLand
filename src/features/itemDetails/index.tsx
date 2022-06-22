@@ -421,6 +421,7 @@ export default function Item() {
                     price={pricePlaceBid}
                     setPrice={setPricePlaceBid}
                     minBid={ethers.utils.formatEther(item ? item.price : "0")}
+                    item={item}
                 />
             )}
             {item && (

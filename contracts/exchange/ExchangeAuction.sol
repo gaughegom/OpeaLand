@@ -24,7 +24,7 @@ contract ExchangeAuction is ExchangeCore {
 	TransferProxy transferProxy;
 	Holder holder;
 
-	uint256 public constant LOWEST_PRICE = 0.001 ether;
+	// uint256 public constant LOWEST_PRICE = 0.001 ether;
 
 	/**
 		Init with transferProxy and holder
@@ -46,7 +46,7 @@ contract ExchangeAuction is ExchangeCore {
 		uint256 time
 	) external
 	{
-		require(startPrice >= LOWEST_PRICE, "ExchangeAuction#start: start price is too low");
+		// require(startPrice >= LOWEST_PRICE, "ExchangeAuction#start: start price is too low");
 		IERC721 erc721 = IERC721(token);
 		address ownerOfToken = erc721.ownerOf(tokenId);
 		require(_msgSender() == ownerOfToken, "Caller is not owner of token");

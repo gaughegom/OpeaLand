@@ -7,6 +7,14 @@ import SvgEthIcon from "../../../svg/svgEthIcon";
 import { styled } from "@mui/material/styles";
 import Checkbox, { CheckboxProps } from "@mui/material/Checkbox";
 
+import { contractAddresses } from "../../../../config";
+
+import Exchange from "../../../../abi/contracts/exchange/Exchange.sol/Exchange.json";
+import { useAppSelector } from "../../../../hooks";
+import { ethers } from "ethers";
+import { http } from "../../../../services/AxiosHelper";
+import { UPDATE_ITEM_PRICE } from "../../../../services/APIurls";
+
 const BpIcon = styled("span")(({ theme }) => ({
     borderRadius: 5,
     width: 24,
@@ -21,15 +29,15 @@ const BpIcon = styled("span")(({ theme }) => ({
             : "linear-gradient(180deg,hsla(0,0%,100%,.8),hsla(0,0%,100%,0))",
     ".Mui-focusVisible &": {
         outline: "2px auto rgba(19,124,189,.6)",
-        outlineOffset: 2,
+        outlineOffset: 2
     },
     "input:disabled ~ &": {
         boxShadow: "none",
         background:
             theme.palette.mode === "dark"
                 ? "rgba(57,75,89,.5)"
-                : "rgba(206,217,224,.5)",
-    },
+                : "rgba(206,217,224,.5)"
+    }
 }));
 
 const BpCheckedIcon = styled(BpIcon)({
@@ -44,11 +52,11 @@ const BpCheckedIcon = styled(BpIcon)({
             "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
             " fill-rule='evenodd' clip-rule='evenodd' d='M12 5c-.28 0-.53.11-.71.29L7 9.59l-2.29-2.3a1.003 " +
             "1.003 0 00-1.42 1.42l3 3c.18.18.43.29.71.29s.53-.11.71-.29l5-5A1.003 1.003 0 0012 5z' fill='%23fff'/%3E%3C/svg%3E\")",
-        content: '""',
+        content: '""'
     },
     "input:hover ~ &": {
-        backgroundColor: "#106ba3",
-    },
+        backgroundColor: "#106ba3"
+    }
 });
 export default function PlaceBid({
     open,
@@ -57,6 +65,7 @@ export default function PlaceBid({
     price,
     setPrice,
     minBid,
+    item
 }: any) {
     const [isChecked, setIsChecked] = React.useState(false);
     const [bid, setBid] = React.useState<string>("0");
@@ -78,9 +87,36 @@ export default function PlaceBid({
         setIsChecked(!isChecked);
     };
 
-    const handlePlaceBidClick = () => {
-        setPrice(bid)
+    const currentSigner = useAppSelector((state) => state.wallet.signer);
+    const handlePlaceBidClick = async () => {
+        setPrice(bid);
         setOpen(false);
+
+        const exchangeContract = new ethers.Contract(
+            contractAddresses.exchange,
+            Exchange.abi,
+            currentSigner
+        );
+
+        const token = item.token;
+        const tokenId = item.tokenId;
+
+        console.log(await exchangeContract.auctionsParam);
+        const weiPrice = (parseFloat(bid) * 1e18).toString();
+        const txBid = await exchangeContract.bid(token, tokenId, {
+            value: weiPrice
+        });
+        console.log(txBid);
+        const txBidReceipt = await txBid.wait();
+        console.log(txBidReceipt);
+
+        // call api update price
+        const resUpdatePrice = await http.put(UPDATE_ITEM_PRICE, {
+            token,
+            tokenId,
+            price: weiPrice
+        });
+        console.log("call api", resUpdatePrice);
     };
 
     return (
@@ -108,7 +144,7 @@ export default function PlaceBid({
                                     style={{
                                         marginRight: "8px",
                                         width: "16px",
-                                        height: "16px",
+                                        height: "16px"
                                     }}
                                 />
                             </span>
@@ -120,7 +156,7 @@ export default function PlaceBid({
                             checked={isChecked}
                             onChange={handleCheck}
                             sx={{
-                                "&:hover": { bgcolor: "transparent" },
+                                "&:hover": { bgcolor: "transparent" }
                             }}
                             checkedIcon={<BpCheckedIcon />}
                             icon={<BpIcon />}

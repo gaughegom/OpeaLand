@@ -239,80 +239,82 @@ export default function Item() {
                         <p className={styles["author"]}>Item is canceled</p>
                     )}
 
-                    { (isOwner || !isCancel) && <div className={styles["box-buynow"]}>
-                        {item?.status !== ITEM_STATUS.NULL && (
-                            <React.Fragment>
-                                <div className={styles.saleEnd}>
-                                    Sale end at {item?.endAt?.toString()}
-                                </div>
-                                <Divider></Divider>
-                            </React.Fragment>
-                        )}
-                        <div className={styles.buttonArea}>
-                            <div className={styles.price}>
-                                <div
-                                    style={{
-                                        fontSize: 16,
-                                        fontWeight: "normal"
-                                    }}
-                                >
-                                    {item?.status === ITEM_STATUS.SALE
-                                        ? "Current price"
-                                        : item?.status === ITEM_STATUS.BID
-                                        ? "Minimum bid"
-                                        : "Unsell"}
-                                </div>
-                                <div>
-                                    {item &&
-                                        ethers.utils.formatEther(
-                                            item.price
-                                        )}{" "}
-                                    <span>
-                                        <SvgEthIcon
-                                            style={{
-                                                marginRight: "8px",
-                                                width: "16px",
-                                                height: "16px"
-                                            }}
-                                        />
-                                    </span>
-                                </div>
-                            </div>
-
-                            {!isOwner && (
-                                <div
-                                    className={styles.button}
-                                    onClick={
-                                        item?.status === ITEM_STATUS.SALE
-                                            ? handleOpenBuy
-                                            : handleOpenPlaceBid
-                                    }
-                                >
-                                    <AccountBalanceWalletIcon
-                                        sx={{ fontSize: 28 }}
-                                    ></AccountBalanceWalletIcon>
-                                    <div>
+                    {(isOwner || !isCancel) && (
+                        <div className={styles["box-buynow"]}>
+                            {item?.status !== ITEM_STATUS.NULL && (
+                                <React.Fragment>
+                                    <div className={styles.saleEnd}>
+                                        Sale end at {item?.endAt?.toString()}
+                                    </div>
+                                    <Divider></Divider>
+                                </React.Fragment>
+                            )}
+                            <div className={styles.buttonArea}>
+                                <div className={styles.price}>
+                                    <div
+                                        style={{
+                                            fontSize: 16,
+                                            fontWeight: "normal"
+                                        }}
+                                    >
                                         {item?.status === ITEM_STATUS.SALE
-                                            ? "Buy now"
-                                            : "Place bid"}
+                                            ? "Current price"
+                                            : item?.status === ITEM_STATUS.BID
+                                            ? "Minimum bid"
+                                            : "Unsell"}
+                                    </div>
+                                    <div>
+                                        {item &&
+                                            ethers.utils.formatEther(
+                                                item.price
+                                            )}{" "}
+                                        <span>
+                                            <SvgEthIcon
+                                                style={{
+                                                    marginRight: "8px",
+                                                    width: "16px",
+                                                    height: "16px"
+                                                }}
+                                            />
+                                        </span>
                                     </div>
                                 </div>
-                            )}
 
-                            {isOwner && !isCancel && (
-                                <div
-                                    className={styles.button}
-                                    style={{ backgroundColor: "#c35555" }}
-                                    onClick={handleCancel}
-                                >
-                                    <CancelIcon
-                                        sx={{ fontSize: 28 }}
-                                    ></CancelIcon>
-                                    <div>Cancel</div>
-                                </div>
-                            )}
+                                {!isOwner && (
+                                    <div
+                                        className={styles.button}
+                                        onClick={
+                                            item?.status === ITEM_STATUS.SALE
+                                                ? handleOpenBuy
+                                                : handleOpenPlaceBid
+                                        }
+                                    >
+                                        <AccountBalanceWalletIcon
+                                            sx={{ fontSize: 28 }}
+                                        ></AccountBalanceWalletIcon>
+                                        <div>
+                                            {item?.status === ITEM_STATUS.SALE
+                                                ? "Buy now"
+                                                : "Place bid"}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {isOwner && !isCancel && (
+                                    <div
+                                        className={styles.button}
+                                        style={{ backgroundColor: "#c35555" }}
+                                        onClick={handleCancel}
+                                    >
+                                        <CancelIcon
+                                            sx={{ fontSize: 28 }}
+                                        ></CancelIcon>
+                                        <div>Cancel</div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>}
+                    )}
 
                     {isOwner && isCancel && (
                         <div className={styles.box_sell_bid}>
@@ -445,6 +447,7 @@ export default function Item() {
                     open={openAuction}
                     setOpen={setOpenAuction}
                     handleClose={handleCloseAuction}
+                    item={item}
                 ></Auction>
             )}
         </div>

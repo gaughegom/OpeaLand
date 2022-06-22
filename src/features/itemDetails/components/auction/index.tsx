@@ -2,10 +2,10 @@ import React from "react";
 
 import styles from "./placeBidStyles.module.scss";
 
-import { useAppDispatch } from "../../../../hooks";
+import { useAppDispatch, useAppSelector } from "../../../../hooks";
 import {
-  pushNotify,
-  removeNotify
+    pushNotify,
+    removeNotify
 } from "../../../../components/Notify/notifySlice";
 
 import Dialog from "@mui/material/Dialog";
@@ -15,110 +15,164 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import TextField from "@mui/material/TextField";
 
-export default function PlaceBid({ open, setOpen, handleClose }: any) {
-  const dispatch = useAppDispatch();
+import { contractAddresses } from "../../../../config";
 
-  const [bid, setBid] = React.useState<number>(0.0001);
+import ExchangeAuction from "../../../../abi/contracts/exchange/ExchangeAuction.sol/ExchangeAuction.json";
+import { BigNumber, ethers } from "ethers";
+import { http } from "../../../../services/AxiosHelper";
+import {
+    UPDATE_ITEM_PRICE,
+    UPDATE_ITEM_STATUS
+} from "../../../../services/APIurls";
 
-  const [endAtInput, setEndAtInput] = React.useState<Date | null>(
-    new Date(Date.now())
-  );
-  const onChangeEndAt = (newValue: Date | null) => {
-    if (newValue) {
-      if (newValue < new Date(Date.now())) {
-        const notify = {
-          id: Date.now().toString(),
-          message: "End time must greater now",
-          type: "error"
-        };
-        dispatch(pushNotify(notify));
-        setTimeout(() => {
-          dispatch(removeNotify(notify));
-        }, 5000);
-      } else {
-        setEndAtInput(newValue);
-      }
-    }
-  };
+export default function PlaceBid({ open, setOpen, handleClose, item }: any) {
+    const dispatch = useAppDispatch();
 
-  const [saveClass, setSaveClass] = React.useState<string>("save_disable");
+    const [bid, setBid] = React.useState<number>(0.0001);
 
-  React.useEffect(() => {
-    var isValidTime = false;
+    const [endAtInput, setEndAtInput] = React.useState<Date | null>(
+        new Date(Date.now())
+    );
+    const onChangeEndAt = (newValue: Date | null) => {
+        if (newValue) {
+            if (newValue < new Date(Date.now())) {
+                const notify = {
+                    id: Date.now().toString(),
+                    message: "End time must greater now",
+                    type: "error"
+                };
+                dispatch(pushNotify(notify));
+                setTimeout(() => {
+                    dispatch(removeNotify(notify));
+                }, 5000);
+            } else {
+                setEndAtInput(newValue);
+            }
+        }
+    };
 
-    if (endAtInput && endAtInput > new Date(Date.now())) {
-      isValidTime = true;
-    } else {
-      isValidTime = false;
-    }
+    const [saveClass, setSaveClass] = React.useState<string>("save_disable");
 
-    if (bid && isValidTime) {
-      setSaveClass("save");
-    } else {
-      setSaveClass("save_disable");
-    }
-  }, [endAtInput, bid]);
+    React.useEffect(() => {
+        var isValidTime = false;
 
-  const handleBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBid(+e.target.value);
-  };
-  const handlePlaceBidClick = () => {
-    setOpen(false);
-  };
+        if (endAtInput && endAtInput > new Date(Date.now())) {
+            isValidTime = true;
+        } else {
+            isValidTime = false;
+        }
 
-  return (
-    <Dialog open={open} onClose={handleClose}>
-      <div className={styles.box}>
-        <div className={styles.flex}>
-          <div className={styles.title}>Auction</div>
+        if (bid && isValidTime) {
+            setSaveClass("save");
+        } else {
+            setSaveClass("save_disable");
+        }
+    }, [endAtInput, bid]);
 
-          <div className={styles.form}>
-            <label className={styles.label} htmlFor="price">
-              Min price
-            </label>
+    const handleBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setBid(+e.target.value);
+    };
 
-            <div className={styles.input_box}>
-              <input
-                type="number"
-                id="price"
-                min={0.0001}
-                value={bid}
-                onChange={handleBidChange}
-                className={styles.input}
-              ></input>
-              <span>
-                <SvgEthIcon
-                  style={{
-                    marginRight: "8px",
-                    width: "16px",
-                    height: "16px"
-                  }}
-                />
-              </span>
+    const currentSigner = useAppSelector((state) => state.wallet.signer);
+    const handlePlaceBidClick = async () => {
+        setOpen(false);
+        // init contract
+        const exchangeAuctContract = new ethers.Contract(
+            contractAddresses.exchangeAuction,
+            ExchangeAuction.abi,
+            currentSigner
+        );
+
+        // start auction
+        const token = item.token;
+        const tokenId = item.tokenId;
+        const weiPrice = (bid * 1e18).toString();
+        const duringTime = BigNumber.from(
+            Math.floor((endAtInput?.valueOf()! - Date.now()) / 1000)
+        );
+        const txStart = await exchangeAuctContract.start(
+            token,
+            tokenId,
+            duringTime,
+            weiPrice
+        );
+        await txStart.wait();
+
+        // call api status & price
+        const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
+            token,
+            tokenId,
+            status: 2
+        });
+        if (resUpdateStatus.status === 200) {
+            const resUpdatePrice = await http.put(UPDATE_ITEM_PRICE, {
+                token,
+                tokenId,
+                price: weiPrice
+            });
+            console.log(resUpdatePrice);
+        }
+    };
+
+    return (
+        <Dialog open={open} onClose={handleClose}>
+            <div className={styles.box}>
+                <div className={styles.flex}>
+                    <div className={styles.title}>Auction</div>
+
+                    <div className={styles.form}>
+                        <label className={styles.label} htmlFor="price">
+                            Min price
+                        </label>
+
+                        <div className={styles.input_box}>
+                            <input
+                                type="number"
+                                id="price"
+                                min={0.0001}
+                                value={bid}
+                                onChange={handleBidChange}
+                                className={styles.input}
+                            ></input>
+                            <span>
+                                <SvgEthIcon
+                                    style={{
+                                        marginRight: "8px",
+                                        width: "16px",
+                                        height: "16px"
+                                    }}
+                                />
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className={styles.form}>
+                        <label className={styles.label} htmlFor="endAt">
+                            End time
+                        </label>
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <DateTimePicker
+                                value={endAtInput}
+                                onChange={onChangeEndAt}
+                                renderInput={(params) => (
+                                    <TextField {...params} />
+                                )}
+                            />
+                        </LocalizationProvider>
+                    </div>
+
+                    <div
+                        className={styles[saveClass]}
+                        onClick={
+                            saveClass === "save"
+                                ? handlePlaceBidClick
+                                : undefined
+                        }
+                    >
+                        Confirm
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div className={styles.form}>
-            <label className={styles.label} htmlFor="endAt">
-              End time
-            </label>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DateTimePicker
-                value={endAtInput}
-                onChange={onChangeEndAt}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
-          </div>
-
-          <div
-            className={styles[saveClass]}
-            onClick={saveClass === "save" ? handlePlaceBidClick : undefined}
-          >
-            Confirm
-          </div>
-        </div>
-      </div>
-    </Dialog>
-  );
+        </Dialog>
+    );
 }

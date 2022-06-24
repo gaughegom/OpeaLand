@@ -13,10 +13,13 @@ import {
     UPDATE_ITEM_PRICE
 } from "../../../../services/APIurls";
 import { BigNumber, ethers } from "ethers";
-import { useAppSelector } from "../../../../hooks";
+import { useAppDispatch, useAppSelector } from "../../../../hooks";
 import { http } from "../../../../services/AxiosHelper";
+import { pushNotify, removeNotify } from "../../../../components/Notify/notifySlice";
 
 export default function ReSell({ open, setOpen, handleClose, item }: any) {
+    const dispatch = useAppDispatch();
+
     const [price, setPrice] = React.useState<number>(0.0001);
 
     const [saveClass, setSaveClass] = React.useState<string>("save_disable");
@@ -67,6 +70,16 @@ export default function ReSell({ open, setOpen, handleClose, item }: any) {
         });
 
         console.log(resUpdatePrice);
+
+        const notify = {
+            id: Date.now().toString(),
+            type: "success",
+            message: "Resell item successfully.",
+        };
+        dispatch(pushNotify(notify));
+        setTimeout(() => {
+            dispatch(removeNotify(notify));
+        }, 5000);
     };
 
     return (

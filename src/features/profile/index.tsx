@@ -26,65 +26,14 @@ import { useAppSelector, useAppDispatch } from "../../hooks";
 import { pushNotify, removeNotify } from "../../components/Notify/notifySlice";
 import { IWalletModel } from "../../model/Wallet.model";
 import { ICollectionModel } from "../../model/Collection.model";
+import { http } from "../../services/AxiosHelper";
+import {
+    GET_COLLECTION_BY_OWNER,
+    GET_ITEM_BY_OWNER,
+} from "../../services/APIurls";
 
 const DEFAULT_AVT =
     "https://storage.googleapis.com/opensea-static/opensea-profile/24.png";
-
-const mockAPIWallet: IWalletModel = {
-    address: "0xd35ksfd3gh34543",
-    displayName: "ThangAka",
-    description: "This is my Profile",
-    imageUrl:
-        "https://lh3.googleusercontent.com/GZ0mR0bDWG37xNN2aHU1Pbw7x6vP1ffOE3uIWRz0RgmUPuoNJ1x88XnMIzen8DzgniR1QRTkDBAy8IwLFKSf-V6cinr4I-Vqof_XbII=s168",
-    bannerUrl:
-        "https://lh3.googleusercontent.com/Xr3fiIUsW7MFizYceyVzwKMIkA62X5b00JpALnIQT839mOkbGEtfJRYEV1rLB_JHGzwsKlFRSAUZdCUm1KgQgQQmSdvWOv_eHkCc0A=h600",
-    email: "pham1506thang@gmail.com",
-};
-
-const mockAPIsItem: IItemModel[] = [
-    {
-        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
-        tokenId: "1",
-        price: "12000000000000000000",
-        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
-        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
-        ownerDisplay: "Joner",
-        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: 1,
-        thumbLink: "http://loremflickr.com/640/480/abstract",
-        collectionName: "Emerson",
-        name: "Amos Daugherty",
-        endAt: "2083-06-25T15:24:21.037Z",
-    },
-    {
-        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
-        tokenId: "2",
-        price: "12000000000000000000",
-        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
-        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
-        ownerDisplay: "Gausts",
-        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: 1,
-        thumbLink: "http://loremflickr.com/640/480/abstract",
-        collectionName: "Emerson",
-        name: "Amos Daugherty",
-        endAt: "2083-06-25T15:24:21.037Z",
-    },
-    {
-        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
-        tokenId: "3",
-        price: "12000000000000000000",
-        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
-        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
-        ownerDisplay: "Baed",
-        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: 1,
-        thumbLink: "http://loremflickr.com/640/480/abstract",
-        collectionName: "Emerson",
-        name: "Amos Daugherty",
-        endAt: "2083-06-25T15:24:21.037Z",
-    },
-];
 
 const mockAPIsCollection: ICollectionModel[] = [
     {
@@ -168,7 +117,8 @@ export default function Profile() {
             <div>No item to display</div>
         </div>
     );
-    const [items, setItem] = useState<IItemModel[]>([]);
+    const [items, setItems] = useState<IItemModel[]>([]);
+    const [collections, setCollections] = useState<ICollectionModel[]>([]);
 
     // useEffect(() => {
     //     const fetchData = async () => {
@@ -180,6 +130,22 @@ export default function Profile() {
 
     //     fetchData();
     // }, []);
+    useEffect(() => {
+        const fetchData = async () => {
+            const collections: ICollectionModel[] = (
+                await http.get(GET_COLLECTION_BY_OWNER + `/${me?.address}`)
+            ).data;
+
+            const newItems: IItemModel[] = (
+                await http.get(GET_ITEM_BY_OWNER + `/${me?.address}`)
+            ).data;
+
+            setItems(newItems);
+            setCollections(collections);
+        };
+
+        fetchData();
+    }, []);
     const navigate = useNavigate();
     //------
     //valid form
@@ -377,7 +343,7 @@ export default function Profile() {
                     <div className={styles.container}>
                         {currentIndicator === 1 && (
                             <div>
-                                {mockAPIsItem !== [] ? (
+                                {items !== [] ? (
                                     <Grid item>
                                         <Grid
                                             container
@@ -385,7 +351,7 @@ export default function Profile() {
                                             columnSpacing={2}
                                             className={styles.boxItem}
                                         >
-                                            {mockAPIsItem.map((item, idx) => (
+                                            {items.map((item, idx) => (
                                                 <Grid item md={3} key={idx}>
                                                     <CardItem
                                                         thumbLink={
@@ -426,30 +392,28 @@ export default function Profile() {
                                 >
                                     Create a collection
                                 </div>
-                                {mockAPIsCollection !== [] ? (
+                                {collections !== [] ? (
                                     <Grid
                                         container
                                         rowSpacing={2}
                                         columnSpacing={2}
                                     >
-                                        {mockAPIsCollection.map(
-                                            (item, index) => (
-                                                <Grid
-                                                    item
-                                                    md={4}
-                                                    key={index}
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `${COLLECTION_PATH}/${item.token}`
-                                                        )
-                                                    }
-                                                >
-                                                    <CardItemCollection
-                                                        {...item}
-                                                    ></CardItemCollection>
-                                                </Grid>
-                                            )
-                                        )}
+                                        {collections.map((item, index) => (
+                                            <Grid
+                                                item
+                                                md={4}
+                                                key={index}
+                                                onClick={() =>
+                                                    navigate(
+                                                        `${COLLECTION_PATH}/${item.token}`
+                                                    )
+                                                }
+                                            >
+                                                <CardItemCollection
+                                                    {...item}
+                                                ></CardItemCollection>
+                                            </Grid>
+                                        ))}
                                     </Grid>
                                 ) : (
                                     noItem

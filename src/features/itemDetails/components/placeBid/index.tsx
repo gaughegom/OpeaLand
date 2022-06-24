@@ -12,10 +12,11 @@ import { contractAddresses } from "../../../../config";
 import Exchange from "../../../../abi/contracts/exchange/Exchange.sol/Exchange.json";
 import ExchangeAuction from "../../../../abi/contracts/exchange/ExchangeAuction.sol/ExchangeAuction.json";
 
-import { useAppSelector } from "../../../../hooks";
+import { useAppDispatch, useAppSelector } from "../../../../hooks";
 import { BigNumber, ethers } from "ethers";
 import { http } from "../../../../services/AxiosHelper";
 import { UPDATE_ITEM_PRICE } from "../../../../services/APIurls";
+import { pushNotify, removeNotify } from "../../../../components/Notify/notifySlice";
 
 const BpIcon = styled("span")(({ theme }) => ({
     borderRadius: 5,
@@ -69,6 +70,7 @@ export default function PlaceBid({
     minBid,
     item
 }: any) {
+    const dispatch = useAppDispatch();
     const [isChecked, setIsChecked] = React.useState(false);
     const [bid, setBid] = React.useState<string>("0");
 
@@ -143,6 +145,16 @@ export default function PlaceBid({
             price: auctionParam.highestBid.toString()
         });
         console.log("call api", resUpdatePrice);
+
+        const notify = {
+            id: Date.now().toString(),
+            type: "success",
+            message: "Place bid successfully.",
+        };
+        dispatch(pushNotify(notify));
+        setTimeout(() => {
+            dispatch(removeNotify(notify));
+        }, 5000);
     };
 
     return (

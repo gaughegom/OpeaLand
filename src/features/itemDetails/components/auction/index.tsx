@@ -112,6 +112,16 @@ export default function PlaceBid({ open, setOpen, handleClose, item }: any) {
             });
             console.log(resUpdatePrice);
         }
+
+        const notify = {
+            id: Date.now().toString(),
+            type: "success",
+            message: "Auction successfully.",
+        };
+        dispatch(pushNotify(notify));
+        setTimeout(() => {
+            dispatch(removeNotify(notify));
+        }, 5000);
     };
 
     return (

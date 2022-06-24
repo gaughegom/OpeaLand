@@ -24,7 +24,8 @@ import { contractAddresses } from "../../../../config";
 
 import ExchangeSell from "../../../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json";
 import Exchange from "../../../../abi/contracts/exchange/Exchange.sol/Exchange.json";
-import { useAppSelector } from "../../../../hooks";
+import { useAppDispatch, useAppSelector } from "../../../../hooks";
+import { pushNotify, removeNotify } from "../../../../components/Notify/notifySlice";
 
 const BpIcon = styled("span")(({ theme }) => ({
     borderRadius: 5,
@@ -71,6 +72,7 @@ const BpCheckedIcon = styled(BpIcon)({
 });
 export default function Buy({ open, setOpen, handleClose, item }: any) {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     const [isChecked, setIsChecked] = React.useState(false);
 
@@ -124,6 +126,16 @@ export default function Buy({ open, setOpen, handleClose, item }: any) {
             });
             console.log(resUpdateStatus);
         }
+
+        const notify = {
+            id: Date.now().toString(),
+            type: "success",
+            message: "Buy item successfully.",
+        };
+        dispatch(pushNotify(notify));
+        setTimeout(() => {
+            dispatch(removeNotify(notify));
+        }, 5000);
     };
 
     return (

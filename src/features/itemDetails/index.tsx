@@ -24,7 +24,8 @@ import {
     GET_IPFS,
     GET_ITEM_BY_TOKEN,
     GET_ITEM_BY_TOKENID,
-    UPDATE_ITEM_STATUS,
+    UPDATE_ITEM_OWNER,
+    UPDATE_ITEM_STATUS
 } from "../../services/APIurls";
 import formatAddress from "../../utils/formatAddress";
 import SvgEthIcon from "../svg/svgEthIcon";
@@ -35,6 +36,8 @@ import { COLLECTION_PATH } from "../../routes";
 import { useAppSelector, useAppDispatch } from "../../hooks";
 
 import ExchangeSell from "../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json";
+import ExchangeAuction from "../../abi/contracts/exchange/ExchangeAuction.sol/ExchangeAuction.json";
+import ERC721Land from "../../abi/contracts/token/ERC721Land.sol/ERC721Land.json";
 
 import { contractAddresses } from "../../config";
 import { pushNotify, removeNotify } from "../../components/Notify/notifySlice";
@@ -42,7 +45,7 @@ import { pushNotify, removeNotify } from "../../components/Notify/notifySlice";
 const ITEM_STATUS = {
     BID: 2,
     SALE: 1,
-    NULL: 0,
+    NULL: 0
 };
 export default function Item() {
     const params = useParams();
@@ -97,14 +100,14 @@ export default function Item() {
         const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
             token: item?.token,
             tokenId: item?.tokenId,
-            status: 0,
+            status: 0
         });
         console.log(resUpdateStatus);
 
         const notify = {
             id: Date.now().toString(),
             type: "success",
-            message: "Cancel sell successfully.",
+            message: "Cancel sell successfully."
         };
         dispatch(pushNotify(notify));
         setTimeout(() => {
@@ -117,30 +120,45 @@ export default function Item() {
 
         setIsCancel(true);
         // // call cancel func in contract
+        const exchangeAuctionContract = new ethers.Contract(
+            contractAddresses.exchangeAuction,
+            ExchangeAuction.abi,
+            currentSigner
+        );
 
-        // var exchangeSellContract = new ethers.Contract(
-        //     contractAddresses.exchangeSell,
-        //     ExchangeSell.abi,
-        //     currentSigner
-        // );
-        // const txDelist = await exchangeSellContract.delist(
-        //     item?.token,
-        //     item?.tokenId
-        // );
-        // const txDelistReceipt = await txDelist.wait();
+        const txEnd = await exchangeAuctionContract.end(
+            item?.token,
+            item?.tokenId
+        );
+        const txEndReceipt = await txEnd.wait();
 
-        // // call api
-        // const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
-        //     token: item?.token,
-        //     tokenId: item?.tokenId,
-        //     status: 0,
-        // });
-        // console.log(resUpdateStatus);
+        console.log(txEndReceipt);
+
+        // call api
+        const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
+            token: item?.token,
+            tokenId: item?.tokenId,
+            status: 0
+        });
+
+        const erc721Contract = new ethers.Contract(
+            item?.token!,
+            ERC721Land.abi,
+            currentSigner
+        );
+        const newOwner = await erc721Contract.ownerOf(item?.tokenId);
+
+        const resUpdateOwner = await http.put(UPDATE_ITEM_OWNER, {
+            token: item?.token,
+            tokenId: item?.tokenId,
+            owner: newOwner
+        });
+        console.log(resUpdateOwner);
 
         const notify = {
             id: Date.now().toString(),
             type: "success",
-            message: "End Auction successfully.",
+            message: "End Auction successfully."
         };
         dispatch(pushNotify(notify));
         setTimeout(() => {
@@ -229,7 +247,7 @@ export default function Item() {
                                                 const notify = {
                                                     id: Date.now().toString(),
                                                     type: "success",
-                                                    message: "Copied.",
+                                                    message: "Copied."
                                                 };
                                                 dispatch(pushNotify(notify));
                                                 setTimeout(() => {
@@ -298,7 +316,7 @@ export default function Item() {
                                     <div
                                         style={{
                                             fontSize: 16,
-                                            fontWeight: "normal",
+                                            fontWeight: "normal"
                                         }}
                                     >
                                         {item?.status === ITEM_STATUS.SALE
@@ -317,7 +335,7 @@ export default function Item() {
                                                 style={{
                                                     marginRight: "8px",
                                                     width: "16px",
-                                                    height: "16px",
+                                                    height: "16px"
                                                 }}
                                             />
                                         </span>
@@ -350,7 +368,7 @@ export default function Item() {
                                         <div
                                             className={styles.button}
                                             style={{
-                                                backgroundColor: "#c35555",
+                                                backgroundColor: "#c35555"
                                             }}
                                             onClick={handleCancel}
                                         >
@@ -367,7 +385,7 @@ export default function Item() {
                                         <div
                                             className={styles.button}
                                             style={{
-                                                backgroundColor: "#c35555",
+                                                backgroundColor: "#c35555"
                                             }}
                                             onClick={handleEndAuction}
                                         >

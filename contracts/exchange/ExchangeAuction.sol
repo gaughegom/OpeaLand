@@ -95,7 +95,7 @@ contract ExchangeAuction is ExchangeCore {
 
 		emit EndAuction(assetKey);
 		// transfer highest bid
-		if (auctionParam.highestBid == 0) {
+		if (auctionParam.highestBidder == address(0)) {
 			transferProxy.erc721SafeTransfer(IERC721(token), address(holder), asset.domain.seller, tokenId);
 			return;
 		} 

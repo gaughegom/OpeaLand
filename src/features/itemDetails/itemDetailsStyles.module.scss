@@ -177,6 +177,14 @@
               cursor: pointer;
               opacity: 0.9;
             }
+            &_disable {
+              @extend .button;
+              background-color: #868686;
+              &:hover {
+                cursor: auto;
+                opacity: 1;
+              }
+            }
           }
         }
       }

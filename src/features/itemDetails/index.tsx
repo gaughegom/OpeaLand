@@ -38,6 +38,7 @@ import ExchangeSell from "../../abi/contracts/exchange/ExchangeSell.sol/Exchange
 
 import { contractAddresses } from "../../config";
 import { pushNotify, removeNotify } from "../../components/Notify/notifySlice";
+import { isBidding } from "./helper";
 
 const ITEM_STATUS = {
     BID: 2,
@@ -217,14 +218,14 @@ export default function Item() {
                             <Divider></Divider>
                             <div className={styles.content}>
                                 <div className={styles.row}>
-                                    <div>Contact address</div>
+                                    <div>Contract address</div>
                                     {/* <div>{formatAddress(item?.owner)}</div> */}
                                     <div>
                                         <div
                                             className={styles.address}
                                             onClick={() => {
                                                 navigator.clipboard.writeText(
-                                                    item?.owner!
+                                                    item?.token!
                                                 );
                                                 const notify = {
                                                     id: Date.now().toString(),
@@ -240,7 +241,7 @@ export default function Item() {
                                             }}
                                         >
                                             <div>
-                                                {formatAddress(item?.owner!)}
+                                                {formatAddress(item?.token!)}
                                             </div>
                                             <ContentCopyIcon
                                                 sx={{ fontSize: 20 }}
@@ -285,7 +286,7 @@ export default function Item() {
 
                     {(isOwner || !isCancel) && (
                         <div className={styles["box-buynow"]}>
-                            {item?.status !== ITEM_STATUS.NULL && (
+                            {item?.status === ITEM_STATUS.BID && (
                                 <React.Fragment>
                                     <div className={styles.saleEnd}>
                                         Sale end at {item?.endAt?.toString()}
@@ -365,11 +366,21 @@ export default function Item() {
                                     !isCancel &&
                                     item?.status === ITEM_STATUS.BID && (
                                         <div
-                                            className={styles.button}
+                                            className={
+                                                styles[
+                                                    isBidding(item?.endAt)
+                                                        ? "button_disable"
+                                                        : "button"
+                                                ]
+                                            }
                                             style={{
-                                                backgroundColor: "#c35555",
+                                                backgroundColor: isBidding(item?.endAt) ? "#868686":"#c35555",
                                             }}
-                                            onClick={handleEndAuction}
+                                            onClick={
+                                                isBidding(item?.endAt)
+                                                    ? undefined
+                                                    : handleEndAuction
+                                            }
                                         >
                                             <CancelIcon
                                                 sx={{ fontSize: 28 }}

@@ -288,13 +288,16 @@ export default function CreateNFT() {
                 ExchangeAuction.abi,
                 currentSigner
             );
+            const duringTime = Math.floor(
+                (endAtInput?.valueOf()! - Date.now()) / 1000
+            );
+            console.log("duringTime", duringTime);
+
             const txList = await exchangeAuctionContract.start(
                 collectionInput,
                 tokenId,
-                BigNumber.from(
-                    Math.floor((endAtInput?.valueOf()! - Date.now()) / 1000)
-                ),
-                ethers.utils.parseEther(priceInput.toString())
+                ethers.utils.parseEther(priceInput.toString()),
+                BigNumber.from(duringTime)
             );
             console.log(txList);
             const txListReceipt = await txList.wait();

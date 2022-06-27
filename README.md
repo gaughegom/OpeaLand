@@ -34,6 +34,9 @@ After deploy contracts at localhost successfully, copy and paste addresses on co
 
 Repo: https://github.com/hungw7/openland-server
 
+- Config `AWS_S3` for Amazon S3 to storage image (please use your config if we delete our config in .env)
+- Config `DATABASE_LOCAL` variable in .env to connect mongodb
+
 # Report
 
 - Link báo cáo: https://uithcm-my.sharepoint.com/:b:/g/personal/19521574_ms_uit_edu_vn/EcDqxRjhMftEtg-4N91GOY0BskAE6-LXNCJXBtfb763SqA?e=nIfjlX

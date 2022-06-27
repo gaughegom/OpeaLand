@@ -11,17 +11,9 @@ import { Grid } from "@mui/material";
 import { ethers } from "ethers";
 import SvgEthIcon from "../../../svg/svgEthIcon";
 
-type Props = {
-    thumbLink: string;
-    token: string;
-    tokenId: string;
-    collection: string;
-    name: string;
-    price: string;
-    isFavorite?: boolean;
-};
+import { IItemModel } from "../../../../model/Item.model";
 
-export default function CardItem(prop: Props) {
+export default function CardItem(prop: IItemModel) {
     const navigate = useNavigate();
 
     return (
@@ -40,7 +32,7 @@ export default function CardItem(prop: Props) {
                     <Grid item md={8}>
                         <Grid container direction="column">
                             <p style={{ fontSize: 14 }}>
-                                {sliceString(prop.collection, 20)}
+                                {sliceString(prop.collectionName, 20)}
                             </p>
                             <p style={{ fontWeight: 600, fontSize: 14 }}>
                                 {sliceString(prop.name, 30)}
@@ -57,11 +49,16 @@ export default function CardItem(prop: Props) {
                             <p style={{ fontSize: 14 }}>Price</p>
                             <div>
                                 <span>
-                                    <SvgEthIcon  style={{marginRight: '8px', width:"16px",  height:"16px"}}/>
+                                    <SvgEthIcon
+                                        style={{
+                                            marginRight: "8px",
+                                            width: "16px",
+                                            height: "16px",
+                                        }}
+                                    />
                                 </span>
                                 {ethers.utils.formatEther(prop.price)}
                             </div>
-                            
                         </Grid>
                     </Grid>
                 </Grid>
@@ -81,6 +78,7 @@ export default function CardItem(prop: Props) {
 }
 
 function sliceString(input: string, numberOfLetter: number) {
+    if (!input) return input;
     if (input.length <= numberOfLetter) {
         return input;
     }

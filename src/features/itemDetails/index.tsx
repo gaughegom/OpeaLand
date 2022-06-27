@@ -8,6 +8,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
 import CancelIcon from "@mui/icons-material/Cancel";
 import BallotIcon from "@mui/icons-material/Ballot";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
 
 import Collection from "./components/collection";
@@ -18,54 +19,43 @@ import Auction from "./components/auction";
 
 import { IItemModel, IItemMetadataModel } from "../../model/Item.model";
 import { http } from "../../services/AxiosHelper";
-import { ALL_ITEMS } from "../../services/APIurls";
+import {
+    ALL_ITEMS,
+    GET_IPFS,
+    GET_ITEM_BY_TOKEN,
+    GET_ITEM_BY_TOKENID,
+    UPDATE_ITEM_OWNER,
+    UPDATE_ITEM_STATUS
+} from "../../services/APIurls";
 import formatAddress from "../../utils/formatAddress";
 import SvgEthIcon from "../svg/svgEthIcon";
 import { ethers } from "ethers";
 import ListIcon from "@mui/icons-material/List";
 import { sliceString } from "../../utils/strimString";
 import { COLLECTION_PATH } from "../../routes";
+import { useAppSelector, useAppDispatch } from "../../hooks";
+
+import ExchangeSell from "../../abi/contracts/exchange/ExchangeSell.sol/ExchangeSell.json";
+import ExchangeAuction from "../../abi/contracts/exchange/ExchangeAuction.sol/ExchangeAuction.json";
+import ERC721Land from "../../abi/contracts/token/ERC721Land.sol/ERC721Land.json";
+
+import { contractAddresses } from "../../config";
+import { pushNotify, removeNotify } from "../../components/Notify/notifySlice";
+import { isBidding } from "./helper";
 
 const ITEM_STATUS = {
-    BID: "bid",
-    SALE: "sale",
-    NULL: "null",
+    BID: 2,
+    SALE: 1,
+    NULL: 0
 };
-const mockItemMetadata: IItemMetadataModel = {
-    thumbLink:
-        "https://lh3.googleusercontent.com/hUJ0MXZxg0KAPc_59PllzGK2hZ68QjkfaRdHNwLSTHMtqlEhn3QJpEv71FVgpRZweMvCQFDP4uyDpMAx0Mg4_4kr6ux-20WmXlfFYQ=w600",
-    description:
-        "Using your past experiences, evolve to become the best version of yourself in the present, taking each moment in time as a gift.",
-    name: "Holy Ghost #1986",
-    properties: [{
-        type: "Jail",
-        name: "Hepedy",
-    },{
-      type: "Wegger",
-      name: "Laige",
-  }],
-};
-const mockAPIItem: IItemModel = {
-    token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
-    tokenId: "3",
-    price: "12000000000000000000",
-    // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
-    owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
-    ownerDisplay: "Baed",
-    ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-    status: "Sell",
-    thumbLink: "http://loremflickr.com/640/480/abstract",
-    collectionName: "Emerson",
-    name: "Amos Daugherty",
-    endAt: "2083-06-25T15:24:21.037Z",
-    metadata: mockItemMetadata,
-};
-
 export default function Item() {
     const params = useParams();
+    const dispatch = useAppDispatch();
+    const me = useAppSelector((state) => state.wallet.walletInfo);
+
     const navigate = useNavigate();
     const [item, setItem] = useState<IItemModel>();
-    const [isOwner, setIsOwner] = useState<boolean>(true);
+    const [isOwner, setIsOwner] = useState<boolean>(false);
     const [isCancel, setIsCancel] = useState<boolean>(false);
 
     const [openPlaceBid, setOpenPlaceBid] = useState<boolean>(false);
@@ -89,29 +79,130 @@ export default function Item() {
     const handleOpenAuction = () => setOpenAuction(true);
     const handleCloseAuction = () => setOpenAuction(false);
 
-    const handleCancel = () => {
+    const currentSigner = useAppSelector((state) => state.wallet.signer);
+    const currentAddress = useAppSelector((state) => state.wallet.address);
+
+    const handleCancel = async () => {
         setIsCancel(true);
+        // call cancel func in contract
+
+        var exchangeSellContract = new ethers.Contract(
+            contractAddresses.exchangeSell,
+            ExchangeSell.abi,
+            currentSigner
+        );
+        const txDelist = await exchangeSellContract.delist(
+            item?.token,
+            item?.tokenId
+        );
+        const txDelistReceipt = await txDelist.wait();
+
+        // call api
+        const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
+            token: item?.token,
+            tokenId: item?.tokenId,
+            status: 0
+        });
+        console.log(resUpdateStatus);
+
+        const notify = {
+            id: Date.now().toString(),
+            type: "success",
+            message: "Cancel sell successfully."
+        };
+        dispatch(pushNotify(notify));
+        setTimeout(() => {
+            dispatch(removeNotify(notify));
+        }, 5000);
+    };
+
+    const handleEndAuction = async () => {
+        //logic for END AUCTION
+
+        setIsCancel(true);
+        // // call cancel func in contract
+        const exchangeAuctionContract = new ethers.Contract(
+            contractAddresses.exchangeAuction,
+            ExchangeAuction.abi,
+            currentSigner
+        );
+
+        const txEnd = await exchangeAuctionContract.end(
+            item?.token,
+            item?.tokenId
+        );
+        const txEndReceipt = await txEnd.wait();
+
+        console.log(txEndReceipt);
+
+        // call api
+        const resUpdateStatus = await http.put(UPDATE_ITEM_STATUS, {
+            token: item?.token,
+            tokenId: item?.tokenId,
+            status: 0
+        });
+
+        const erc721Contract = new ethers.Contract(
+            item?.token!,
+            ERC721Land.abi,
+            currentSigner
+        );
+        const newOwner = await erc721Contract.ownerOf(item?.tokenId);
+
+        const resUpdateOwner = await http.put(UPDATE_ITEM_OWNER, {
+            token: item?.token,
+            tokenId: item?.tokenId,
+            owner: newOwner
+        });
+        console.log(resUpdateOwner);
+
+        const notify = {
+            id: Date.now().toString(),
+            type: "success",
+            message: "End Auction successfully."
+        };
+        dispatch(pushNotify(notify));
+        setTimeout(() => {
+            dispatch(removeNotify(notify));
+        }, 5000);
     };
 
     useEffect(() => {
         const fetchData = async () => {
             const newItem: IItemModel = (
                 await http.get<IItemModel[]>(
-                    ALL_ITEMS +
-                        `?token=${params.token}&tokenId=${params.tokenId}`
+                    GET_ITEM_BY_TOKENID + `/${params.token}/${params.tokenId}`
                 )
             ).data[0];
-            if (newItem) {
-                const newMetaData: IItemMetadataModel = (
-                    await http.get<IItemMetadataModel>(newItem.ipfsUrl!)
-                ).data;
-                newItem.metadata = newMetaData;
-                setItem(newItem);
+            // if (newItem) {
+            //     const newMetaData: IItemMetadataModel = (
+            //         await http.get<IItemMetadataModel>(newItem.ipfsUrl!)
+            //     ).data;
+            //     newItem.metadata = newMetaData;
+            // }
+            setItem(newItem);
+
+            const splitedIpfs = newItem.ipfsUrl?.split("/");
+            const cid = splitedIpfs[2];
+
+            const metadata: IItemMetadataModel = (
+                await http.get<IItemMetadataModel>(GET_IPFS + `/${cid}`)
+            ).data;
+
+            if (metadata) {
+                setItem({ metadata, ...newItem });
             }
         };
 
         fetchData();
     }, [params]);
+
+    useEffect(() => {
+        if (item) {
+            setIsOwner(me?.address === item.owner);
+            setIsCancel(item.status === 0);
+        }
+    }, [item]);
 
     return (
         <div className={styles.page}>
@@ -131,7 +222,7 @@ export default function Item() {
                             </div>
                             <Divider></Divider>
                             <div className={styles.content}>
-                                {mockAPIItem.metadata?.description}
+                                {item?.metadata?.description}
                             </div>
                         </div>
 
@@ -145,8 +236,36 @@ export default function Item() {
                             <Divider></Divider>
                             <div className={styles.content}>
                                 <div className={styles.row}>
-                                    <div>Contact address</div>
-                                    <div>{formatAddress(item?.token)}</div>
+                                    <div>Contract address</div>
+                                    {/* <div>{formatAddress(item?.owner)}</div> */}
+                                    <div>
+                                        <div
+                                            className={styles.address}
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(
+                                                    item?.token!
+                                                );
+                                                const notify = {
+                                                    id: Date.now().toString(),
+                                                    type: "success",
+                                                    message: "Copied."
+                                                };
+                                                dispatch(pushNotify(notify));
+                                                setTimeout(() => {
+                                                    dispatch(
+                                                        removeNotify(notify)
+                                                    );
+                                                }, 5000);
+                                            }}
+                                        >
+                                            <div>
+                                                {formatAddress(item?.token!)}
+                                            </div>
+                                            <ContentCopyIcon
+                                                sx={{ fontSize: 20 }}
+                                            ></ContentCopyIcon>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className={styles.row}>
                                     <div>Token ID</div>
@@ -183,12 +302,12 @@ export default function Item() {
                         <p className={styles["author"]}>Item is canceled</p>
                     )}
 
-                    {isOwner && !isCancel && (
+                    {(isOwner || !isCancel) && (
                         <div className={styles["box-buynow"]}>
-                            {item?.status !== ITEM_STATUS.NULL && (
+                            {item?.status === ITEM_STATUS.BID && (
                                 <React.Fragment>
                                     <div className={styles.saleEnd}>
-                                        Sale end at {item?.endAt.toString()}
+                                        Sale end at {item?.endAt?.toString()}
                                     </div>
                                     <Divider></Divider>
                                 </React.Fragment>
@@ -198,12 +317,14 @@ export default function Item() {
                                     <div
                                         style={{
                                             fontSize: 16,
-                                            fontWeight: "normal",
+                                            fontWeight: "normal"
                                         }}
                                     >
                                         {item?.status === ITEM_STATUS.SALE
                                             ? "Current price"
-                                            : "Minimum bid"}
+                                            : item?.status === ITEM_STATUS.BID
+                                            ? "Minimum bid"
+                                            : "Unsell"}
                                     </div>
                                     <div>
                                         {item &&
@@ -215,7 +336,7 @@ export default function Item() {
                                                 style={{
                                                     marginRight: "8px",
                                                     width: "16px",
-                                                    height: "16px",
+                                                    height: "16px"
                                                 }}
                                             />
                                         </span>
@@ -225,7 +346,11 @@ export default function Item() {
                                 {!isOwner && (
                                     <div
                                         className={styles.button}
-                                        onClick={handleOpenPlaceBid}
+                                        onClick={
+                                            item?.status === ITEM_STATUS.SALE
+                                                ? handleOpenBuy
+                                                : handleOpenPlaceBid
+                                        }
                                     >
                                         <AccountBalanceWalletIcon
                                             sx={{ fontSize: 28 }}
@@ -238,18 +363,49 @@ export default function Item() {
                                     </div>
                                 )}
 
-                                {isOwner && !isCancel && (
-                                    <div
-                                        className={styles.button}
-                                        style={{ backgroundColor: "#c35555" }}
-                                        onClick={handleCancel}
-                                    >
-                                        <CancelIcon
-                                            sx={{ fontSize: 28 }}
-                                        ></CancelIcon>
-                                        <div>Cancel</div>
-                                    </div>
-                                )}
+                                {isOwner &&
+                                    !isCancel &&
+                                    item?.status === ITEM_STATUS.SALE && (
+                                        <div
+                                            className={styles.button}
+                                            style={{
+                                                backgroundColor: "#c35555"
+                                            }}
+                                            onClick={handleCancel}
+                                        >
+                                            <CancelIcon
+                                                sx={{ fontSize: 28 }}
+                                            ></CancelIcon>
+                                            <div>Cancel</div>
+                                        </div>
+                                    )}
+
+                                {isOwner &&
+                                    !isCancel &&
+                                    item?.status === ITEM_STATUS.BID && (
+                                        <div
+                                            className={
+                                                styles[
+                                                    isBidding(item?.endAt)
+                                                        ? "button_disable"
+                                                        : "button"
+                                                ]
+                                            }
+                                            style={{
+                                                backgroundColor: isBidding(item?.endAt) ? "#868686":"#c35555",
+                                            }}
+                                            onClick={
+                                                isBidding(item?.endAt)
+                                                    ? undefined
+                                                    : handleEndAuction
+                                            }
+                                        >
+                                            <CancelIcon
+                                                sx={{ fontSize: 28 }}
+                                            ></CancelIcon>
+                                            <div>End Auction</div>
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     )}
@@ -276,7 +432,6 @@ export default function Item() {
                             </div>
                         </div>
                     )}
-
                     {/* <div className={styles.boxPriceList}>
                         <div className={styles.title}>
                             <ShowChartIcon
@@ -312,20 +467,32 @@ export default function Item() {
                                 </div>
                                 <Divider></Divider>
                                 <div className={styles.content}>
-                                    {mockAPIItem.metadata?.properties &&
-                                        mockAPIItem.metadata?.properties.map((item, idx) => (
-                                            <div
-                                                className={styles.property}
-                                                key={idx}
-                                            >
-                                                <div className={styles.type}>
-                                                    {sliceString(item.type, 10)}
+                                    {item?.metadata?.properties &&
+                                        item?.metadata?.properties.map(
+                                            (item, idx) => (
+                                                <div
+                                                    className={styles.property}
+                                                    key={idx}
+                                                >
+                                                    <div
+                                                        className={styles.type}
+                                                    >
+                                                        {sliceString(
+                                                            item.type,
+                                                            10
+                                                        )}
+                                                    </div>
+                                                    <div
+                                                        className={styles.name}
+                                                    >
+                                                        {sliceString(
+                                                            item.name,
+                                                            10
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className={styles.name}>
-                                                    {sliceString(item.name, 10)}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -333,9 +500,12 @@ export default function Item() {
                 </div>
             </div>
 
-            <Collection></Collection>
+            <Collection token={params.token!}></Collection>
 
-            <div className={styles.viewCollection} onClick={() => navigate(COLLECTION_PATH + `/${mockAPIItem.token}`)}>
+            <div
+                className={styles.viewCollection}
+                onClick={() => navigate(COLLECTION_PATH + `/${item?.token}`)}
+            >
                 <div className={styles.button}>View collection</div>
             </div>
 
@@ -347,6 +517,7 @@ export default function Item() {
                     price={pricePlaceBid}
                     setPrice={setPricePlaceBid}
                     minBid={ethers.utils.formatEther(item ? item.price : "0")}
+                    item={item}
                 />
             )}
             {item && (
@@ -362,6 +533,7 @@ export default function Item() {
                     open={openResell}
                     setOpen={setOpenResell}
                     handleClose={handleCloseResell}
+                    item={item}
                 ></Resell>
             )}
             {item && (
@@ -369,6 +541,7 @@ export default function Item() {
                     open={openAuction}
                     setOpen={setOpenAuction}
                     handleClose={handleCloseAuction}
+                    item={item}
                 ></Auction>
             )}
         </div>

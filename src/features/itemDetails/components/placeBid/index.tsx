@@ -7,6 +7,17 @@ import SvgEthIcon from "../../../svg/svgEthIcon";
 import { styled } from "@mui/material/styles";
 import Checkbox, { CheckboxProps } from "@mui/material/Checkbox";
 
+import { contractAddresses } from "../../../../config";
+
+import Exchange from "../../../../abi/contracts/exchange/Exchange.sol/Exchange.json";
+import ExchangeAuction from "../../../../abi/contracts/exchange/ExchangeAuction.sol/ExchangeAuction.json";
+
+import { useAppDispatch, useAppSelector } from "../../../../hooks";
+import { BigNumber, ethers } from "ethers";
+import { http } from "../../../../services/AxiosHelper";
+import { UPDATE_ITEM_PRICE } from "../../../../services/APIurls";
+import { pushNotify, removeNotify } from "../../../../components/Notify/notifySlice";
+
 const BpIcon = styled("span")(({ theme }) => ({
     borderRadius: 5,
     width: 24,
@@ -21,15 +32,15 @@ const BpIcon = styled("span")(({ theme }) => ({
             : "linear-gradient(180deg,hsla(0,0%,100%,.8),hsla(0,0%,100%,0))",
     ".Mui-focusVisible &": {
         outline: "2px auto rgba(19,124,189,.6)",
-        outlineOffset: 2,
+        outlineOffset: 2
     },
     "input:disabled ~ &": {
         boxShadow: "none",
         background:
             theme.palette.mode === "dark"
                 ? "rgba(57,75,89,.5)"
-                : "rgba(206,217,224,.5)",
-    },
+                : "rgba(206,217,224,.5)"
+    }
 }));
 
 const BpCheckedIcon = styled(BpIcon)({
@@ -44,11 +55,11 @@ const BpCheckedIcon = styled(BpIcon)({
             "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath" +
             " fill-rule='evenodd' clip-rule='evenodd' d='M12 5c-.28 0-.53.11-.71.29L7 9.59l-2.29-2.3a1.003 " +
             "1.003 0 00-1.42 1.42l3 3c.18.18.43.29.71.29s.53-.11.71-.29l5-5A1.003 1.003 0 0012 5z' fill='%23fff'/%3E%3C/svg%3E\")",
-        content: '""',
+        content: '""'
     },
     "input:hover ~ &": {
-        backgroundColor: "#106ba3",
-    },
+        backgroundColor: "#106ba3"
+    }
 });
 export default function PlaceBid({
     open,
@@ -57,7 +68,9 @@ export default function PlaceBid({
     price,
     setPrice,
     minBid,
+    item
 }: any) {
+    const dispatch = useAppDispatch();
     const [isChecked, setIsChecked] = React.useState(false);
     const [bid, setBid] = React.useState<string>("0");
 
@@ -78,8 +91,70 @@ export default function PlaceBid({
         setIsChecked(!isChecked);
     };
 
-    const handlePlaceBidClick = () => {
+    const currentSigner = useAppSelector((state) => state.wallet.signer);
+    const handlePlaceBidClick = async () => {
+        setPrice(bid);
         setOpen(false);
+
+        const exchangeContract = new ethers.Contract(
+            contractAddresses.exchange,
+            Exchange.abi,
+            currentSigner
+        );
+        const exchangeAuctionContract = new ethers.Contract(
+            contractAddresses.exchangeAuction,
+            ExchangeAuction.abi,
+            currentSigner
+        );
+
+        const token = item.token;
+        const tokenId = item.tokenId;
+
+        const assetHashKey = ethers.utils.solidityKeccak256(
+            ["address", "uint256"],
+            [token, tokenId]
+        );
+
+        // get bidValue
+        const bidedValue = (
+            await exchangeAuctionContract.bidValueInAsset(assetHashKey)
+        ).toString();
+        console.log("bidedValue", bidedValue);
+
+        const weiPrice = (parseFloat(bid) * 1e18).toString();
+
+        const addValue = BigNumber.from(weiPrice).sub(
+            BigNumber.from(bidedValue)
+        );
+
+        console.log("addedValue", addValue.toString());
+        // call contract
+        const txBid = await exchangeContract.bid(token, tokenId, {
+            value: addValue
+        });
+        await txBid.wait();
+
+        // updateApi
+
+        const auctionParam = await exchangeAuctionContract.auctionsParam(
+            assetHashKey
+        );
+        const resUpdatePrice = await http.put(UPDATE_ITEM_PRICE, {
+            token,
+            tokenId,
+            price: auctionParam.highestBid.toString()
+        });
+        console.log("call api", resUpdatePrice);
+
+        const notify = {
+            id: Date.now().toString(),
+            type: "success",
+            message: "Place bid successfully.",
+        };
+        dispatch(pushNotify(notify));
+        setTimeout(() => {
+            dispatch(removeNotify(notify));
+        }, 5000);
     };
 
     return (
@@ -92,6 +167,7 @@ export default function PlaceBid({
                         <label className={styles.label} htmlFor="bid">
                             Offer amount
                         </label>
+                        <p>We will auto calculate bid value before</p>
 
                         <div className={styles.input_box}>
                             <input
@@ -99,6 +175,7 @@ export default function PlaceBid({
                                 id="bid"
                                 value={bid}
                                 onChange={handleBidChange}
+                                min={+minBid}
                                 className={styles.input}
                             ></input>
                             <span>
@@ -106,7 +183,7 @@ export default function PlaceBid({
                                     style={{
                                         marginRight: "8px",
                                         width: "16px",
-                                        height: "16px",
+                                        height: "16px"
                                     }}
                                 />
                             </span>
@@ -118,7 +195,7 @@ export default function PlaceBid({
                             checked={isChecked}
                             onChange={handleCheck}
                             sx={{
-                                "&:hover": { bgcolor: "transparent" },
+                                "&:hover": { bgcolor: "transparent" }
                             }}
                             checkedIcon={<BpCheckedIcon />}
                             icon={<BpIcon />}

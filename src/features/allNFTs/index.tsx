@@ -17,50 +17,49 @@ import { IItemModel, IItemMetadataModel } from "../../model/Item.model";
 
 import { http } from "../../services/AxiosHelper";
 
-const mockAPIsItem: IItemModel[] = [
-    {
-        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
-        tokenId: "1",
-        price: "12000000000000000000",
-        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
-        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
-        ownerDisplay: "Joner",
-        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: "Sell",
-        thumbLink: "http://loremflickr.com/640/480/abstract",
-        collectionName: "Emerson",
-        name: "Amos Daugherty",
-        endAt: "2083-06-25T15:24:21.037Z",
-    },
-    {
-        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
-        tokenId: "2",
-        price: "12000000000000000000",
-        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
-        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
-        ownerDisplay: "Gausts",
-        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: "Sell",
-        thumbLink: "http://loremflickr.com/640/480/abstract",
-        collectionName: "Emerson",
-        name: "Amos Daugherty",
-        endAt: "2083-06-25T15:24:21.037Z",
-    },
-    {
-        token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
-        tokenId: "3",
-        price: "12000000000000000000",
-        // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
-        owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
-        ownerDisplay: "Baed",
-        ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
-        status: "Sell",
-        thumbLink: "http://loremflickr.com/640/480/abstract",
-        collectionName: "Emerson",
-        name: "Amos Daugherty",
-        endAt: "2083-06-25T15:24:21.037Z",
-    },
-];
+// const mockAPIsItem: IItemModel[] = [
+//     {
+//         token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
+//         tokenId: "1",
+//         price: "12000000000000000000",
+//         owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
+//         ownerDisplay: "Joner",
+//         ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
+//         status: 1,
+//         thumbLink: "http://loremflickr.com/640/480/abstract",
+//         collectionName: "Emerson",
+//         name: "Amos Daugherty",
+//         endAt: "2083-06-25T15:24:21.037Z",
+//     },
+//     {
+//         token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
+//         tokenId: "2",
+//         price: "12000000000000000000",
+//         // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
+//         owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
+//         ownerDisplay: "Gausts",
+//         ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
+//         status: 1,
+//         thumbLink: "http://loremflickr.com/640/480/abstract",
+//         collectionName: "Emerson",
+//         name: "Amos Daugherty",
+//         endAt: "2083-06-25T15:24:21.037Z",
+//     },
+//     {
+//         token: "0xa041cd6a29b51ea150c1df09190d460e4a8f69fa",
+//         tokenId: "3",
+//         price: "12000000000000000000",
+//         // creator: "0x473555075d70a736788dcfcd7ca2901870cc575e",
+//         owner: "0x8995fcfa937a4bd874b47855d4f86d506ce9d3fc",
+//         ownerDisplay: "Baed",
+//         ipfsUrl: "https://6297612314e756fe3b2e98ee.mockapi.io/api/ipfs/1",
+//         status: 1,
+//         thumbLink: "http://loremflickr.com/640/480/abstract",
+//         collectionName: "Emerson",
+//         name: "Amos Daugherty",
+//         endAt: "2083-06-25T15:24:21.037Z",
+//     },
+// ];
 
 export default function AllNFTsPage() {
     const open = useAppSelector((state) => state.allNFTs.open);
@@ -69,17 +68,17 @@ export default function AllNFTsPage() {
     );
 
     //-- real data
-    // const [apiItems, setApiItems] = useState<IItemModel[]>([]);
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const newItems: IItemModel[] = (
-    //             await http.get<IItemModel[]>(ALL_ITEMS)
-    //         ).data;
-    //         setApiItems(newItems);
-    //     };
+    const [apiItems, setApiItems] = useState<IItemModel[]>([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            const newItems: IItemModel[] = (
+                await http.get<IItemModel[]>(ALL_ITEMS + "/all")
+            ).data;
+            setApiItems(newItems);
+        };
 
-    //     fetchData();
-    // }, []);
+        fetchData();
+    }, []);
     //----
 
     return (
@@ -102,8 +101,8 @@ export default function AllNFTsPage() {
                                 columnSpacing={2}
                                 className={styles.boxItem}
                             >
-                                {mockAPIsItem !== [] &&
-                                    mockAPIsItem.map((item) => (
+                                {apiItems !== [] &&
+                                    apiItems.map((item) => (
                                         <Grid
                                             item
                                             md={open ? 4 : 3}
@@ -114,9 +113,16 @@ export default function AllNFTsPage() {
                                                 tokenId={item.tokenId}
                                                 token={item.token}
                                                 name={item.name}
-                                                collection={item.collectionName}
+                                                collectionName={
+                                                    item.collectionName
+                                                }
                                                 //isFavorite={item.isFavorite}
                                                 price={item.price}
+                                                owner={item.owner}
+                                                ownerDisplay={item.ownerDisplay}
+                                                ipfsUrl={item.ipfsUrl}
+                                                status={item.status}
+                                                endAt={item.endAt}
                                             ></CardItem>
                                         </Grid>
                                     ))}

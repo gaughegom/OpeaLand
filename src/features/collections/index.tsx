@@ -71,12 +71,15 @@ const mockAPIs: ICollectionModel[] = [
 export default function () {
     const navigate = useNavigate();
 
-    var allCollections = [];
+    const [allCollections, setAllCollections] = React.useState<
+        ICollectionModel[]
+    >([]);
 
     React.useEffect(() => {
         const fetchData = async () => {
-            const result = await http.get<any>(GET_ALL_COLLECTIONS + "/all");
-            allCollections = result.data;
+            const result = (await http.get<any>(GET_ALL_COLLECTIONS + "/all"))
+                .data;
+            setAllCollections(result);
         };
 
         fetchData();
@@ -87,8 +90,8 @@ export default function () {
             <Banner></Banner>
             <p className={styles.headTitle}>Explore Collectibles</p>
             <Grid container spacing={4} className={styles.grid}>
-                {mockAPIs &&
-                    mockAPIs.map((item, index) => (
+                {allCollections &&
+                    allCollections.map((item, index) => (
                         <Grid
                             item
                             md={4}

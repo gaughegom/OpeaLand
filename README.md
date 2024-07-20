@@ -39,7 +39,7 @@ Repo: https://github.com/hungw7/openland-server
 
 # Report
 
-- Link báo cáo: https://uithcm-my.sharepoint.com/:b:/g/personal/19521574_ms_uit_edu_vn/EcDqxRjhMftEtg-4N91GOY0BskAE6-LXNCJXBtfb763SqA?e=nIfjlX
+- Link báo cáo: https://github.com/shifuvn/openland-contract/blob/master/DA1_19521574%2619522216_SE121.M21_NguyenTanToan.pdf
 
 - Thành viên:
   - Nguyễn Thanh Hưng (19521574)
